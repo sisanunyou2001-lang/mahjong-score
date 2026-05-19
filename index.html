@@ -227,6 +227,30 @@
   }
   .data-bar-label { color: rgba(255,215,0,0.7); font-size: 0.8rem; font-weight: 600; }
   .data-bar-info  { color: rgba(255,255,255,0.45); font-size: 0.76rem; margin-left: auto; }
+
+  /* ── GitHub同期 ── */
+  .gh-token-wrap {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .gh-token-wrap label { color: rgba(255,215,0,0.65); font-size: 0.76rem; white-space: nowrap; }
+  .gh-token-input {
+    background: rgba(0,0,0,0.35); border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 6px; color: #fff; font-size: 0.78rem; padding: 5px 10px;
+    width: 220px; font-family: monospace; outline: none;
+    transition: border-color .2s;
+  }
+  .gh-token-input:focus { border-color: var(--gold); }
+  .gh-token-input::placeholder { color: rgba(255,255,255,0.25); }
+  #gh-sync-status {
+    font-size: 0.74rem; padding: 3px 10px; border-radius: 12px;
+    background: rgba(0,0,0,0.3); white-space: nowrap;
+  }
+  #gh-sync-status.ok     { color: #52c41a; }
+  #gh-sync-status.err    { color: #ff4d4f; }
+  #gh-sync-status.syncing{ color: #faad14; }
+  #gh-sync-status.idle   { color: rgba(255,255,255,0.35); }
+  #save-indicator.gh-ok   .dot { background: #52c41a; }
+  #save-indicator.gh-err  .dot { background: #ff4d4f; }
 </style>
 </head>
 <body>
@@ -331,10 +355,17 @@
 <div class="data-bar">
   <span class="data-bar-label">💾 データ管理</span>
   <button class="btn btn-primary btn-sm" onclick="clearAllData()">🗑 データをリセット</button>
+  <div class="gh-token-wrap">
+    <label for="gh-token-input">🔑 GitHub Token:</label>
+    <input class="gh-token-input" type="password" id="gh-token-input"
+           placeholder="ghp_xxxxxxxxxxxx" oninput="onTokenInput(this.value)"
+           autocomplete="off" spellcheck="false">
+    <span id="gh-sync-status" class="idle">未連携</span>
+  </div>
   <span class="data-bar-info" id="last-saved-label">―</span>
 </div>
 
-<div class="footer">🀄 麻雀 月間成績集計表 ｜ 入力データは自動保存されます</div>
+<div class="footer">🀄 麻雀 月間成績集計表 ｜ 入力データは自動保存（ローカル＋GitHub）されます</div>
 </div>
 
 <!-- 保存インジケーター -->
@@ -343,7 +374,11 @@
 <script>
 const PLAYER_COLORS = ['#e63946','#457b9d','#2d6a4f','#e76f51','#6a0572','#0077b6','#d4a017','#2f4858'];
 const MIN_P = 2, MAX_P = 8;
-const STORAGE_KEY = 'mahjong_scoresheet_v1';
+const STORAGE_KEY   = 'mahjong_scoresheet_v1';
+const GH_TOKEN_KEY  = 'mahjong_gh_token_v1';
+const GH_OWNER      = 'sisanunyou2001-lang';
+const GH_REPO       = 'mahjong-score';
+const GH_DATA_FILE  = 'data.json';
 
 let activePlayers = 4;
 let players = ['山田','鈴木','田中','佐藤','伊藤','渡辺','高橋','小林'];
@@ -351,34 +386,169 @@ let gameData = [];
 let chartLine, chartBar, chartFirst, chartAvg;
 let chartsReady = false;
 let _saveTimer = null;
+let _ghSyncing = false;
+
+/* ─────────── GitHub API ─────────── */
+
+function getGHToken() { return localStorage.getItem(GH_TOKEN_KEY) || ''; }
+
+function setSyncStatus(state, msg) {
+  const el = document.getElementById('gh-sync-status');
+  if (!el) return;
+  el.className = state; el.textContent = msg;
+}
+
+function onTokenInput(val) {
+  const trimmed = val.trim();
+  localStorage.setItem(GH_TOKEN_KEY, trimmed);
+  if (!trimmed) { setSyncStatus('idle', '未連携'); return; }
+  setSyncStatus('syncing', '接続確認中…');
+  verifyToken(trimmed);
+}
+
+async function verifyToken(token) {
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}`, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (res.ok) { setSyncStatus('ok', '✓ GitHub連携済み'); }
+    else        { setSyncStatus('err', '✗ トークンエラー'); }
+  } catch(e)    { setSyncStatus('err', '✗ 接続失敗'); }
+}
+
+async function getFileSha(token) {
+  const res = await fetch(
+    `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_DATA_FILE}`,
+    { headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github.v3+json' } }
+  );
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`SHA取得失敗: ${res.status}`);
+  return (await res.json()).sha;
+}
+
+async function pushToGitHub(state) {
+  const token = getGHToken();
+  if (!token || _ghSyncing) return;
+  _ghSyncing = true;
+  try {
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2))));
+    const sha = await getFileSha(token);
+    const body = {
+      message: `麻雀データ更新 ${new Date().toLocaleString('ja-JP')}`,
+      content,
+      ...(sha ? { sha } : {})
+    };
+    const res = await fetch(
+      `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_DATA_FILE}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/vnd.github.v3+json'
+        },
+        body: JSON.stringify(body)
+      }
+    );
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `HTTP ${res.status}`);
+    }
+    setSyncStatus('ok', '✓ GitHub同期済み');
+    return true;
+  } catch(e) {
+    console.error('GitHub push failed:', e);
+    setSyncStatus('err', `✗ 同期失敗: ${e.message}`);
+    return false;
+  } finally {
+    _ghSyncing = false;
+  }
+}
+
+async function loadFromGitHub() {
+  const token = getGHToken();
+  if (!token) return false;
+  try {
+    setSyncStatus('syncing', 'GitHubから読込中…');
+    const url = `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/${GH_DATA_FILE}?t=${Date.now()}`;
+    const res = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Cache-Control': 'no-cache' }
+    });
+    if (!res.ok) { setSyncStatus('ok', '✓ GitHub連携済み'); return false; }
+    const s = await res.json();
+    applyState(s);
+    setSyncStatus('ok', '✓ GitHubから読込完了');
+    return true;
+  } catch(e) {
+    setSyncStatus('err', '✗ 読込失敗');
+    return false;
+  }
+}
+
+function applyState(s) {
+  activePlayers = s.activePlayers ?? 4;
+  players       = s.players      ?? players;
+  gameData      = s.gameData     ?? [];
+  if (s.year)  document.getElementById('meta-year').value  = s.year;
+  if (s.month) document.getElementById('meta-month').value = s.month;
+  if (s.rules) {
+    const r = s.rules;
+    if (r.mochi  != null) document.getElementById('r-mochi').value  = r.mochi;
+    if (r.kaeshi != null) document.getElementById('r-kaeshi').value = r.kaeshi;
+    if (r.oka    != null) document.getElementById('r-oka').value    = r.oka;
+    if (r.uma1   != null) document.getElementById('r-uma1').value   = r.uma1;
+    if (r.uma2   != null) document.getElementById('r-uma2').value   = r.uma2;
+    if (r.uma3   != null) document.getElementById('r-uma3').value   = r.uma3;
+    if (r.uma4   != null) document.getElementById('r-uma4').value   = r.uma4;
+    if (r.type   != null) document.getElementById('r-type').value   = r.type;
+  }
+  if (s.savedAt) updateLastSavedLabel(s.savedAt);
+}
+
+/* ─────────── 保存・読込 ─────────── */
+
+function buildState() {
+  return {
+    activePlayers, players, gameData,
+    year:  document.getElementById('meta-year')?.value,
+    month: document.getElementById('meta-month')?.value,
+    rules: {
+      mochi:  document.getElementById('r-mochi')?.value,
+      kaeshi: document.getElementById('r-kaeshi')?.value,
+      oka:    document.getElementById('r-oka')?.value,
+      uma1:   document.getElementById('r-uma1')?.value,
+      uma2:   document.getElementById('r-uma2')?.value,
+      uma3:   document.getElementById('r-uma3')?.value,
+      uma4:   document.getElementById('r-uma4')?.value,
+      type:   document.getElementById('r-type')?.value,
+    },
+    savedAt: new Date().toISOString(),
+  };
+}
 
 function saveAll() {
   const ind = document.getElementById('save-indicator');
+  ind.classList.remove('gh-ok','gh-err');
   ind.classList.add('show', 'saving');
   document.getElementById('save-text').textContent = '保存中…';
   clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(() => {
-    const state = {
-      activePlayers, players, gameData,
-      year:  document.getElementById('meta-year')?.value,
-      month: document.getElementById('meta-month')?.value,
-      rules: {
-        mochi:  document.getElementById('r-mochi')?.value,
-        kaeshi: document.getElementById('r-kaeshi')?.value,
-        oka:    document.getElementById('r-oka')?.value,
-        uma1:   document.getElementById('r-uma1')?.value,
-        uma2:   document.getElementById('r-uma2')?.value,
-        uma3:   document.getElementById('r-uma3')?.value,
-        uma4:   document.getElementById('r-uma4')?.value,
-        type:   document.getElementById('r-type')?.value,
-      },
-      savedAt: new Date().toISOString(),
-    };
+  _saveTimer = setTimeout(async () => {
+    const state = buildState();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    ind.classList.remove('saving');
-    document.getElementById('save-text').textContent = '保存しました ✓';
     updateLastSavedLabel(state.savedAt);
-    setTimeout(() => ind.classList.remove('show'), 3000);
+    ind.classList.remove('saving');
+
+    const token = getGHToken();
+    if (token) {
+      document.getElementById('save-text').textContent = 'GitHubに同期中…';
+      setSyncStatus('syncing', 'GitHubに同期中…');
+      const ok = await pushToGitHub(state);
+      ind.classList.add(ok ? 'gh-ok' : 'gh-err');
+      document.getElementById('save-text').textContent = ok ? 'GitHubに同期しました ✓' : '同期失敗（ローカル保存済）';
+    } else {
+      document.getElementById('save-text').textContent = '保存しました ✓';
+    }
+    setTimeout(() => ind.classList.remove('show','gh-ok','gh-err'), 4000);
   }, 600);
 }
 
@@ -387,23 +557,7 @@ function loadAll() {
   if (!raw) return false;
   try {
     const s = JSON.parse(raw);
-    activePlayers = s.activePlayers ?? 4;
-    players       = s.players      ?? players;
-    gameData      = s.gameData     ?? [];
-    if (s.year)  document.getElementById('meta-year').value  = s.year;
-    if (s.month) document.getElementById('meta-month').value = s.month;
-    if (s.rules) {
-      const r = s.rules;
-      if (r.mochi  != null) document.getElementById('r-mochi').value  = r.mochi;
-      if (r.kaeshi != null) document.getElementById('r-kaeshi').value = r.kaeshi;
-      if (r.oka    != null) document.getElementById('r-oka').value    = r.oka;
-      if (r.uma1   != null) document.getElementById('r-uma1').value   = r.uma1;
-      if (r.uma2   != null) document.getElementById('r-uma2').value   = r.uma2;
-      if (r.uma3   != null) document.getElementById('r-uma3').value   = r.uma3;
-      if (r.uma4   != null) document.getElementById('r-uma4').value   = r.uma4;
-      if (r.type   != null) document.getElementById('r-type').value   = r.type;
-    }
-    if (s.savedAt) updateLastSavedLabel(s.savedAt);
+    applyState(s);
     return true;
   } catch(e) { return false; }
 }
@@ -425,6 +579,9 @@ function clearAllData() {
   document.getElementById('last-saved-label').textContent = '―';
   updateCounterUI(); renderPlayerGrid(); renderTable(); updateRanking();
   if (chartsReady) updateCharts();
+  // GitHubのdata.jsonも空データで上書き
+  const token = getGHToken();
+  if (token) pushToGitHub(buildState());
 }
 
 function changePlayerCount(delta) {
@@ -656,17 +813,36 @@ function updateCharts() {
   chartAvg.update();
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  const restored = loadAll();
-  if (!restored) {
-    const d = (n) => { const dt=new Date(); dt.setDate(dt.getDate()-n); return dt.toISOString().split('T')[0]; };
-    gameData = [
-      {date:d(6),scores:[{raw:32000,uma:5,total:37000},{raw:28000,uma:-5,total:23000},{raw:18000,uma:-15,total:3000},{raw:22000,uma:3,total:25000},...Array(4).fill(null).map(()=>({raw:'',uma:'',total:0}))]},
-      {date:d(3),scores:[{raw:15000,uma:-5,total:10000},{raw:35000,uma:25,total:60000},{raw:29000,uma:5,total:34000},{raw:21000,uma:-15,total:6000},...Array(4).fill(null).map(()=>({raw:'',uma:'',total:0}))]},
-      {date:d(0),scores:[{raw:38000,uma:28,total:66000},{raw:20000,uma:-5,total:15000},{raw:25000,uma:5,total:30000},{raw:17000,uma:-15,total:2000},...Array(4).fill(null).map(()=>({raw:'',uma:'',total:0}))]}
-    ];
+window.addEventListener('DOMContentLoaded', async () => {
+  // トークンがあれば入力欄に復元
+  const savedToken = getGHToken();
+  if (savedToken) {
+    document.getElementById('gh-token-input').value = savedToken;
+    setSyncStatus('syncing', '接続確認中…');
+    verifyToken(savedToken);
   }
-  updateCounterUI(); renderPlayerGrid(); renderTable(); buildCharts(); updateRanking();
+
+  // まずGitHubから読込み → なければlocalStorage → なければデモデータ
+  let restored = false;
+  if (savedToken) {
+    restored = await loadFromGitHub();
+    if (restored) {
+      updateCounterUI(); renderPlayerGrid(); renderTable(); buildCharts(); updateRanking();
+    }
+  }
+
+  if (!restored) {
+    restored = loadAll();
+    if (!restored) {
+      const d = (n) => { const dt=new Date(); dt.setDate(dt.getDate()-n); return dt.toISOString().split('T')[0]; };
+      gameData = [
+        {date:d(6),scores:[{raw:32000,uma:5,total:37000},{raw:28000,uma:-5,total:23000},{raw:18000,uma:-15,total:3000},{raw:22000,uma:3,total:25000},...Array(4).fill(null).map(()=>({raw:'',uma:'',total:0}))]},
+        {date:d(3),scores:[{raw:15000,uma:-5,total:10000},{raw:35000,uma:25,total:60000},{raw:29000,uma:5,total:34000},{raw:21000,uma:-15,total:6000},...Array(4).fill(null).map(()=>({raw:'',uma:'',total:0}))]},
+        {date:d(0),scores:[{raw:38000,uma:28,total:66000},{raw:20000,uma:-5,total:15000},{raw:25000,uma:5,total:30000},{raw:17000,uma:-15,total:2000},...Array(4).fill(null).map(()=>({raw:'',uma:'',total:0}))]}
+      ];
+    }
+    updateCounterUI(); renderPlayerGrid(); renderTable(); buildCharts(); updateRanking();
+  }
   document.getElementById('meta-year').addEventListener('change', saveAll);
   document.getElementById('meta-month').addEventListener('change', saveAll);
   ['r-mochi','r-kaeshi','r-oka','r-uma1','r-uma2','r-uma3','r-uma4','r-type'].forEach(id => {
