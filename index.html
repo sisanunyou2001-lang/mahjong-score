@@ -490,7 +490,7 @@
       <div class="chart-box"><h3>📊 月間累計ポイント推移</h3><canvas id="chart-line" height="230"></canvas></div>
       <div class="chart-box"><h3>📊 月間合計ポイント比較</h3><canvas id="chart-bar"  height="230"></canvas></div>
       <div class="chart-box"><h3>📊 1位獲得数</h3>             <canvas id="chart-first" height="230"></canvas></div>
-      <div class="chart-box"><h3>📊 平均順位</h3>              <canvas id="chart-avg"   height="230"></canvas></div>
+      <div class="chart-box"><h3>📊 平均換算得点（1局あたり）</h3><canvas id="chart-avg" height="230"></canvas></div>
     </div>
   </div>
 </div>
@@ -552,10 +552,13 @@ let chartsReady = false;
 let _saveTimer = null;
 let _ghSyncing = false;
 
-// 3場は4場換算のために×0.75
+// 3場は4場換算のために一律-10000点
 function convertedTotal(score, mode) {
   const t = (score?.total) || 0;
-  return mode === '3' ? Math.round(t * 0.75) : t;
+  if (mode !== '3') return t;
+  // スコア未入力の場合は補正しない
+  if (score?.raw === '' && t === 0) return 0;
+  return t - 10000;
 }
 
 /* ─────────── GitHub API ─────────── */
@@ -920,7 +923,7 @@ function renderTableBody() {
       const conv = convertedTotal(s, mode);
       const convCls = conv > 0 ? 'positive' : conv < 0 ? 'negative' : '';
       const convStr = (s.raw !== '' || s.total !== 0)
-        ? (mode === '3' ? `<span class="converted-pt ${convCls}">${fmt(conv)}</span><span class="converted-note">×0.75</span>` : `<span class="converted-pt ${convCls}">${fmt(conv)}</span>`)
+        ? (mode === '3' ? `<span class="converted-pt ${convCls}">${fmt(conv)}</span><span class="converted-note">-10k</span>` : `<span class="converted-pt ${convCls}">${fmt(conv)}</span>`)
         : '';
       html += `<td><input type="number" inputmode="numeric" value="${s.raw}" placeholder="0" onchange="setScore(${gi},${pi},'raw',this.value);refresh()"></td>
         <td><input type="number" inputmode="numeric" value="${s.uma}" placeholder="0" onchange="setScore(${gi},${pi},'uma',this.value);refresh()"></td>
@@ -1039,11 +1042,12 @@ function updateRanking() {
 }
 
 function buildCharts() {
-  const opts = (extra={}) => ({ responsive:true, plugins:{legend:{position:'bottom',labels:{font:{size:11,family:'Noto Sans JP'},boxWidth:12}}}, scales:{y:{grid:{color:'#e8e8e8'}},x:{grid:{color:'#f0f0f0'}}}, ...extra });
-  chartLine  = new Chart(document.getElementById('chart-line').getContext('2d'),  {type:'line',data:{labels:[],datasets:[]},options:opts()});
+  const opts = (extra={}) => ({ responsive:true, plugins:{legend:{position:'bottom',labels:{font:{size:11,family:'Noto Sans JP'},boxWidth:12}}}, scales:{y:{grid:{color:'#e8e8e8'},ticks:{callback:v=>v.toLocaleString()}},x:{grid:{color:'#f0f0f0'}}}, ...extra });
+  const lineOpts = { responsive:true, plugins:{legend:{position:'bottom',labels:{font:{size:11,family:'Noto Sans JP'},boxWidth:12}}}, scales:{y:{grid:{color:'#e8e8e8'}, ticks:{callback:v=>v.toLocaleString()}, afterDataLimits(axis){/* ゼロ線を強調 */}},x:{grid:{color:'#f0f0f0'}}}, plugins2:{annotation:{}} };
+  chartLine  = new Chart(document.getElementById('chart-line').getContext('2d'),  {type:'line',data:{labels:[],datasets:[]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11,family:'Noto Sans JP'},boxWidth:12}}},scales:{y:{grid:{color:'#e8e8e8'},ticks:{callback:v=>v.toLocaleString()},border:{color:'#ccc'}},x:{grid:{color:'#f0f0f0'}}}}});
   chartBar   = new Chart(document.getElementById('chart-bar').getContext('2d'),   {type:'bar', data:{labels:[],datasets:[]},options:opts()});
   chartFirst = new Chart(document.getElementById('chart-first').getContext('2d'), {type:'bar', data:{labels:[],datasets:[]},options:opts()});
-  chartAvg   = new Chart(document.getElementById('chart-avg').getContext('2d'),   {type:'bar', data:{labels:[],datasets:[]},options:opts({scales:{y:{reverse:true,min:1,max:activePlayers,ticks:{stepSize:1}},x:{grid:{color:'#f0f0f0'}}}})});
+  chartAvg   = new Chart(document.getElementById('chart-avg').getContext('2d'),   {type:'bar', data:{labels:[],datasets:[]},options:opts({scales:{y:{grid:{color:'#e8e8e8'},ticks:{callback:v=>v.toLocaleString()},border:{dash:[4,4]}},x:{grid:{color:'#f0f0f0'}}}})});
   chartsReady = true;
   updateCharts();
 }
@@ -1061,7 +1065,19 @@ function updateCharts() {
   chartLine.data.labels = lineLabels.length ? lineLabels : ['（対局なし）'];
   chartLine.data.datasets = Array.from({length:activePlayers},(_,pi)=>{
     let cum=0;
-    return {label:players[pi]||`P${pi+1}`,data:gameData.map(g=>{cum+=convertedTotal(g.scores[pi],g.mode||'4');return cum;}),borderColor:PLAYER_COLORS[pi],backgroundColor:PLAYER_COLORS[pi]+'33',tension:0.3,pointRadius:3,fill:false};
+    return {
+      label: players[pi]||`P${pi+1}`,
+      data: gameData.map(g => {
+        const s = g.scores[pi];
+        // 得点 - 25000 を積み重ね（3場は換算後 - 25000、4場は合計Pt - 25000）
+        const base = convertedTotal(s, g.mode||'4');
+        if (s && (s.raw !== '' || s.total !== 0)) cum += (base - 25000);
+        return cum;
+      }),
+      borderColor: PLAYER_COLORS[pi],
+      backgroundColor: PLAYER_COLORS[pi]+'33',
+      tension: 0.3, pointRadius: 3, fill: false
+    };
   });
   chartLine.update();
 
@@ -1075,18 +1091,24 @@ function updateCharts() {
   chartFirst.data.datasets = [{label:'1位回数',data:firstCounts,backgroundColor:colors.map(c=>c+'cc'),borderColor:colors,borderWidth:2,borderRadius:6}];
   chartFirst.update();
 
-  const avgRanks = Array.from({length:activePlayers},(_,pi)=>{
-    if(!gameData.length) return 0;
-    let sum=0;
-    gameData.forEach(g=>{
-      const vals=Array.from({length:activePlayers},(__,j)=>g.scores[j]?.total||0);
-      sum+=([...vals].sort((a,b)=>b-a).indexOf(g.scores[pi]?.total||0))+1;
+  // 1局あたりの平均換算得点
+  const avgScores = Array.from({length:activePlayers},(_,pi)=>{
+    const games = gameData.filter(g => {
+      const s = g.scores[pi];
+      return s && (s.raw !== '' || s.total !== 0);
     });
-    return +(sum/gameData.length).toFixed(2);
+    if (!games.length) return 0;
+    const sum = games.reduce((acc, g) => acc + convertedTotal(g.scores[pi], g.mode||'4'), 0);
+    return Math.round(sum / games.length);
   });
-  chartAvg.options.scales.y.max = activePlayers;
   chartAvg.data.labels = labels;
-  chartAvg.data.datasets = [{label:'平均順位',data:avgRanks,backgroundColor:colors.map(c=>c+'cc'),borderColor:colors,borderWidth:2,borderRadius:6}];
+  chartAvg.data.datasets = [{
+    label: '平均換算得点',
+    data: avgScores,
+    backgroundColor: colors.map((c,i) => avgScores[i] >= 0 ? c+'cc' : '#e63946cc'),
+    borderColor: colors.map((c,i) => avgScores[i] >= 0 ? c : '#e63946'),
+    borderWidth: 2, borderRadius: 6
+  }];
   chartAvg.update();
 }
 
