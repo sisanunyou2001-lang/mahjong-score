@@ -389,6 +389,56 @@
   .btn-archive { background: #6a0572; color: white; }
   .btn-archive:hover { opacity: .85; }
 
+  /* ── デイリーデータ ── */
+  .daily-list { display: flex; flex-direction: column; gap: 10px; }
+  .daily-item {
+    border: 1.5px solid #bbd4f8; border-radius: 10px; overflow: hidden;
+  }
+  .daily-item-header {
+    background: linear-gradient(90deg, #1a3a5c, #1e5799);
+    color: #ffe08a; padding: 9px 16px; display: flex; align-items: center;
+    gap: 10px; cursor: pointer; user-select: none;
+  }
+  .daily-item-header:hover { opacity: .9; }
+  .daily-item-label { font-weight: 700; font-size: 0.95rem; }
+  .daily-item-meta  { font-size: 0.75rem; color: #a8d0ff; margin-left: auto; }
+  .daily-toggle     { font-size: 0.8rem; color: rgba(255,224,138,0.6); }
+  .daily-item-body  { padding: 14px; background: white; display: none; }
+  .daily-item-body.open { display: block; }
+  .daily-scores {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;
+  }
+  .daily-score-chip {
+    padding: 5px 13px; border-radius: 20px; font-size: 0.82rem; font-weight: 700;
+    background: #1a3a5c; color: #ffe08a;
+  }
+  .daily-score-chip.pos { background: #1a472a; color: #ffd700; }
+  .daily-score-chip.neg { background: #5c1a1a; color: #ffaaaa; }
+  .daily-game-rows { font-size: 0.78rem; color: #555; }
+  .daily-game-row { display: flex; gap: 8px; align-items: center; padding: 3px 0; border-bottom: 1px solid #f0f0f0; }
+  .daily-game-row:last-child { border-bottom: none; }
+  .daily-meta-line { font-size: 0.78rem; color: #888; margin-top: 6px; }
+  @media (max-width: 768px) {
+    .daily-item-header { padding: 8px 12px; }
+    .daily-scores { gap: 6px; }
+    .daily-score-chip { font-size: 0.75rem; padding: 3px 10px; }
+  }
+
+  /* ── 個人成績カード ── */
+  .player-stat-card {
+    flex: 1 1 160px; min-width: 150px; max-width: 210px;
+    border-radius: 12px; padding: 14px 16px;
+    background: white; border: 2px solid #d0e8d4;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  }
+  .psc-name { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
+  .psc-row  { display: flex; justify-content: space-between; font-size: 0.78rem; padding: 2px 0; border-bottom: 1px solid #f0f0f0; }
+  .psc-label { color: #777; }
+  .psc-val   { font-weight: 700; }
+  @media (max-width: 480px) {
+    .player-stat-card { flex: 1 1 calc(50% - 6px); max-width: none; }
+  }
+
   @media (max-width: 768px) {
     .archive-item-header { padding: 8px 12px; }
     .archive-ranking { gap: 6px; }
@@ -450,6 +500,7 @@
     </div>
     <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
       <button class="btn btn-gold" onclick="autoCalcUma()">🔄 素点→順位点 自動計算</button>
+      <button class="btn btn-sm" style="background:#6a0572;color:white;font-weight:700;" onclick="reverseCalcSettings()">🔍 入力データから設定を推定</button>
     </div>
   </div>
 </div>
@@ -482,6 +533,18 @@
   </div>
 </div>
 
+<!-- ══ 個人成績カード ══ -->
+<div class="card">
+  <div class="card-header">📊 個人成績サマリー
+    <span style="margin-left:auto;">
+      <button class="btn btn-sm btn-gold" onclick="copySNSText()">📋 SNS用テキストをコピー</button>
+    </span>
+  </div>
+  <div class="card-body">
+    <div id="player-stats-row" style="display:flex;gap:12px;flex-wrap:wrap;"></div>
+  </div>
+</div>
+
 <!-- ══ グラフ ══ -->
 <div class="card">
   <div class="card-header">📈 グラフ分析</div>
@@ -492,6 +555,16 @@
       <div class="chart-box"><h3>📊 1位獲得数</h3>             <canvas id="chart-first" height="230"></canvas></div>
       <div class="chart-box"><h3>📊 平均換算得点（1局あたり）</h3><canvas id="chart-avg" height="230"></canvas></div>
     </div>
+  </div>
+</div>
+
+<!-- ══ デイリーデータ ══ -->
+<div class="card" id="daily-card">
+  <div class="card-header">📆 デイリーデータ
+    <span style="margin-left:auto;font-size:0.75rem;color:rgba(255,215,0,0.6)">対局日別の得失点サマリー</span>
+  </div>
+  <div class="card-body" id="daily-body">
+    <p style="color:#999;text-align:center;padding:10px 0;font-size:0.85rem">対局データがありません</p>
   </div>
 </div>
 
@@ -752,6 +825,96 @@ function updateLastSavedLabel(isoStr) {
   el.textContent = `最終保存: ${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
 
+/* ─────────── 設定逆算 ─────────── */
+
+function reverseCalcSettings() {
+  const kaeshi = +document.getElementById('r-kaeshi').value || 30000;
+  const oka    = +document.getElementById('r-oka').value    || 20000;
+
+  // 完全入力済みの対局を抽出（4場・3場別）
+  const games4 = gameData.filter(g => (g.mode||'4') === '4' &&
+    [0,1,2,3].every(pi => { const s=g.scores[pi]; return s && s.raw!=='' && s.total!==undefined; }));
+  const games3 = gameData.filter(g => g.mode === '3' &&
+    [0,1,2].every(pi => { const s=g.scores[pi]; return s && s.raw!=='' && s.total!==undefined; }));
+
+  if (games4.length < 2 && games3.length < 2) {
+    alert('逆算に必要なデータが不足しています。\n4場または3場の完全なデータが2局以上必要です。');
+    return;
+  }
+
+  const round1k = v => Math.round(v / 1000) * 1000;
+  const avg = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : null;
+
+  function estimateUma(games, nPlayers, okaVal) {
+    const buckets = Array.from({length: nPlayers}, () => []);
+    games.forEach(g => {
+      const entries = Array.from({length: nPlayers}, (_,pi) => ({
+        pi, raw: +g.scores[pi].raw, total: g.scores[pi].total || 0
+      })).sort((a,b) => b.raw - a.raw);
+
+      entries.forEach((e, rank) => {
+        const diff = Math.round((e.raw - kaeshi) / 100) / 10;
+        const okaContrib = rank === 0 ? okaVal / 1000 : 0;
+        const umaUnits = (e.total - e.raw) - diff - okaContrib;
+        buckets[rank].push(umaUnits * 1000);
+      });
+    });
+    return buckets.map(b => b.length ? round1k(avg(b)) : null);
+  }
+
+  let msg = '【推定結果】\n\n';
+  let uma4 = null, uma3 = null;
+
+  if (games4.length >= 2) {
+    uma4 = estimateUma(games4, 4, oka);
+    msg += `4場（${games4.length}局から推定）\n`;
+    msg += `  ウマ: ${uma4.map((v,i)=>`${i+1}位 ${v!=null?(v>=0?'+':'')+v.toLocaleString():'-'}`).join(' / ')}\n\n`;
+  }
+  if (games3.length >= 2) {
+    uma3 = estimateUma(games3, 3, oka);
+    msg += `3場（${games3.length}局から推定）\n`;
+    msg += `  ウマ: ${uma3.slice(0,3).map((v,i)=>`${i+1}位 ${v!=null?(v>=0?'+':'')+v.toLocaleString():'-'}`).join(' / ')}\n\n`;
+  }
+
+  msg += '（返し点・オカは現在の設定値を使用）\nこの値をルール設定に反映しますか？';
+
+  if (!confirm(msg)) return;
+
+  // 4場の値を反映
+  if (uma4) {
+    ['r-uma1','r-uma2','r-uma3','r-uma4'].forEach((id,i) => {
+      if (uma4[i] != null) document.getElementById(id).value = uma4[i];
+    });
+  }
+  saveAll();
+  alert('ルール設定を更新しました ✓');
+}
+
+/* ─────────── 素点合計チェック ─────────── */
+
+function checkRawSum(gi) {
+  const game = gameData[gi];
+  const mode = game.mode || '4';
+  const np   = mode === '3' ? 3 : 4;
+  const expectedSum = mode === '3' ? 105000 : 100000;
+
+  let sum = 0, filled = 0;
+  for (let pi = 0; pi < np; pi++) {
+    const s = game.scores[pi];
+    if (s && s.raw !== '') { sum += +s.raw; filled++; }
+  }
+  if (filled < np) return; // まだ全員入力されていない
+
+  const warn = document.getElementById(`raw-warn-${gi}`);
+  if (!warn) return;
+  if (sum !== expectedSum) {
+    warn.textContent = `⚠ 素点合計 ${sum.toLocaleString()}（${mode}場は${expectedSum.toLocaleString()}点）`;
+    warn.style.display = 'inline';
+  } else {
+    warn.style.display = 'none';
+  }
+}
+
 /* ─────────── 月次アーカイブ ─────────── */
 
 function archiveCurrentMonth() {
@@ -779,6 +942,99 @@ function archiveCurrentMonth() {
   renderTable(); updateRanking(); if (chartsReady) updateCharts();
   renderArchives(); saveAll();
   alert(`${year}年${month}月を確定しました ✓`);
+}
+
+/* ─────────── デイリーデータ ─────────── */
+
+function renderDailyData() {
+  const body = document.getElementById('daily-body');
+  if (!body) return;
+
+  // ゲームデータを日付ごとにグループ化
+  const byDate = {};
+  gameData.forEach((g, gi) => {
+    const d = g.date || '不明';
+    if (!byDate[d]) byDate[d] = [];
+    byDate[d].push({g, gi});
+  });
+  const dates = Object.keys(byDate).sort((a,b) => b.localeCompare(a)); // 新しい順
+
+  if (!dates.length) {
+    body.innerHTML = '<p style="color:#999;text-align:center;padding:10px 0;font-size:0.85rem">対局データがありません</p>';
+    return;
+  }
+
+  const medals = ['🥇','🥈','🥉','4位','5位','6位','7位','8位'];
+
+  body.innerHTML = '<div class="daily-list">' + dates.map((date, di) => {
+    const entries = byDate[date];
+
+    // その日の各プレイヤーの得失点を集計
+    const playerTotals = Array.from({length: activePlayers}, (_, pi) => {
+      let netPt = 0, gamesPlayed = 0;
+      entries.forEach(({g}) => {
+        const s = g.scores[pi];
+        if (!s || s.raw === '' || s.raw === null) return;
+        netPt += Math.round(convertedTotal(s, g.mode || '4') - 25000);
+        gamesPlayed++;
+      });
+      return {pi, name: players[pi] || `P${pi+1}`, netPt, gamesPlayed};
+    }).filter(p => p.gamesPlayed > 0);
+
+    // 得失点順にソート
+    playerTotals.sort((a, b) => b.netPt - a.netPt);
+
+    const games3 = entries.filter(({g}) => (g.mode||'4') === '3').length;
+    const games4 = entries.filter(({g}) => (g.mode||'4') === '4').length;
+    const summary = `全${entries.length}局（4場:${games4} / 3場:${games3}）`;
+
+    // 日付フォーマット
+    const dateObj = new Date(date);
+    const dateLabel = isNaN(dateObj) ? date :
+      `${dateObj.getFullYear()}年${dateObj.getMonth()+1}月${dateObj.getDate()}日（${'日月火水木金土'[dateObj.getDay()]}）`;
+
+    const chips = playerTotals.map((p, ri) => {
+      const cls = p.netPt > 0 ? 'pos' : p.netPt < 0 ? 'neg' : '';
+      const sign = p.netPt >= 0 ? '+' : '';
+      return `<span class="daily-score-chip ${cls}">${medals[ri]} ${p.name}　${sign}${p.netPt.toLocaleString()}pt</span>`;
+    }).join('');
+
+    // 各試合の詳細行
+    const gameRows = entries.map(({g, gi}) => {
+      const mode = g.mode || '4';
+      const np = mode === '3' ? 3 : 4;
+      const parts = [];
+      for (let pi = 0; pi < activePlayers; pi++) {
+        const s = g.scores[pi];
+        if (!s || s.raw === '' || s.raw === null) continue;
+        const net = Math.round(convertedTotal(s, mode) - 25000);
+        const sign = net >= 0 ? '+' : '';
+        const col = net > 0 ? '#1a7a3a' : net < 0 ? '#c0392b' : '#666';
+        parts.push(`<span style="color:${col}">${players[pi]||`P${pi+1}`}:${sign}${net.toLocaleString()}</span>`);
+      }
+      return `<div class="daily-game-row"><span class="mode-badge mode-${mode}" style="font-size:0.68rem;padding:1px 6px">${mode}場</span>${parts.join('　')}</div>`;
+    }).join('');
+
+    return `
+      <div class="daily-item">
+        <div class="daily-item-header" onclick="toggleDaily(${di})">
+          <span class="daily-item-label">📅 ${dateLabel}</span>
+          <span class="daily-item-meta">${summary}</span>
+          <span class="daily-toggle" id="daily-toggle-${di}">▶</span>
+        </div>
+        <div class="daily-item-body" id="daily-body-${di}">
+          <div class="daily-scores">${chips}</div>
+          <div class="daily-game-rows">${gameRows}</div>
+        </div>
+      </div>`;
+  }).join('') + '</div>';
+}
+
+function toggleDaily(di) {
+  const body = document.getElementById(`daily-body-${di}`);
+  const tog  = document.getElementById(`daily-toggle-${di}`);
+  const open = body.classList.toggle('open');
+  tog.textContent = open ? '▼' : '▶';
 }
 
 function renderArchives() {
@@ -904,7 +1160,7 @@ function renderTableHead() {
   for (let i = 0; i < activePlayers; i++)
     r1 += `<th colspan="4" style="min-width:120px;background:${PLAYER_COLORS[i]}cc">${players[i]||'P'+(i+1)}</th>`;
   r1 += '</tr><tr>';
-  for (let i = 0; i < activePlayers; i++) r1 += '<th>素点</th><th>順位点</th><th>合計Pt</th><th style="color:#d4a0ff">換算Pt</th>';
+  for (let i = 0; i < activePlayers; i++) r1 += '<th>素点</th><th>順位点</th><th>合計Pt</th><th style="color:#d4a0ff">得失点</th>';
   thead.innerHTML = r1 + '</tr>';
 }
 
@@ -915,17 +1171,20 @@ function renderTableBody() {
     const mode = game.mode || '4';
     const tr = document.createElement('tr');
     let html = `<td style="color:#999;font-size:.78rem">${gi+1}</td>
-      <td><input type="date" value="${game.date}" onchange="gameData[${gi}].date=this.value;refreshFoot()"></td>
+      <td><input type="date" value="${game.date}" onchange="gameData[${gi}].date=this.value;refreshFoot()"><br>
+          <span id="raw-warn-${gi}" style="display:none;color:#e63946;font-size:0.68rem;white-space:nowrap;"></span></td>
       <td><span class="mode-badge mode-${mode}">${mode}場</span></td>`;
     for (let pi = 0; pi < activePlayers; pi++) {
       const s = game.scores[pi] || {raw:'', uma:'', total:0};
       const cls = s.total > 0 ? 'positive' : s.total < 0 ? 'negative' : '';
       const conv = convertedTotal(s, mode);
-      const convCls = conv > 0 ? 'positive' : conv < 0 ? 'negative' : '';
-      const convStr = (s.raw !== '' || s.total !== 0)
-        ? (mode === '3' ? `<span class="converted-pt ${convCls}">${fmt(conv)}</span><span class="converted-note">-10k</span>` : `<span class="converted-pt ${convCls}">${fmt(conv)}</span>`)
+      const hasData = s.raw !== '' || s.total !== 0;
+      const netConv = hasData ? Math.round(conv - 25000) : 0;
+      const netCls = netConv > 0 ? 'positive' : netConv < 0 ? 'negative' : '';
+      const convStr = hasData
+        ? `<span class="converted-pt ${netCls}">${fmt(netConv)}</span>${mode === '3' ? '<span class="converted-note">-10k</span>' : ''}`
         : '';
-      html += `<td><input type="number" inputmode="numeric" value="${s.raw}" placeholder="0" onchange="setScore(${gi},${pi},'raw',this.value);refresh()"></td>
+      html += `<td><input type="number" inputmode="numeric" value="${s.raw}" placeholder="0" onchange="setScore(${gi},${pi},'raw',this.value);refresh();checkRawSum(${gi})"></td>
         <td><input type="number" inputmode="numeric" value="${s.uma}" placeholder="0" onchange="setScore(${gi},${pi},'uma',this.value);refresh()"></td>
         <td class="cell-total ${cls}">${s.total!==0||s.raw!==''?fmt(s.total):''}</td>
         <td>${convStr}</td>`;
@@ -942,10 +1201,10 @@ function renderTableFoot() {
   let tr1 = '<tr class="total-row"><td>―</td><td>📊 月間合計</td><td>―</td>';
   for (let i = 0; i < activePlayers; i++) {
     const t = totals[i];
-    tr1 += `<td>${fmt(t.raw)}</td><td>${fmt(t.uma)}</td><td>${fmt(t.total)}</td><td style="color:#d4a0ff">${fmt(t.converted)}</td>`;
+    tr1 += `<td>${fmt(t.raw)}</td><td>${fmt(t.uma)}</td><td>${fmt(t.total)}</td><td style="color:#d4a0ff">${fmt(t.netPt)}</td>`;
   }
-  // 換算Pt基準で順位を決定
-  const ranked = Array.from({length:activePlayers},(_,i)=>({i,converted:totals[i].converted})).sort((a,b)=>b.converted-a.converted);
+  // 得失点基準で順位を決定
+  const ranked = Array.from({length:activePlayers},(_,i)=>({i,netPt:totals[i].netPt})).sort((a,b)=>b.netPt-a.netPt);
   const rankOf = new Array(activePlayers);
   ranked.forEach((r,ri) => { rankOf[r.i] = ri+1; });
   const medals = ['🥇','🥈','🥉','4位','5位','6位','7位','8位'];
@@ -954,7 +1213,7 @@ function renderTableFoot() {
   tfoot.innerHTML = tr1 + '</tr>' + tr2 + '</tr>';
 }
 
-function renderTable() { renderTableHead(); renderTableBody(); renderTableFoot(); }
+function renderTable() { renderTableHead(); renderTableBody(); renderTableFoot(); renderDailyData(); }
 
 function setScore(gi, pi, key, val) {
   while (!gameData[gi].scores[pi]) gameData[gi].scores.push({raw:'',uma:'',total:0});
@@ -982,7 +1241,7 @@ function refresh() {
   gameData.forEach(g => g.scores.forEach(s => { if(s) s.total=(s.raw===''?0:+s.raw)+(s.uma===''?0:+s.uma); }));
   renderTableBody(); refreshFoot();
 }
-function refreshFoot() { renderTableFoot(); updateRanking(); if (chartsReady) updateCharts(); saveAll(); }
+function refreshFoot() { renderTableFoot(); updateRanking(); updatePlayerStats(); renderDailyData(); if (chartsReady) updateCharts(); saveAll(); }
 
 function autoCalcUma() {
   const kaeshi = +document.getElementById('r-kaeshi').value;
@@ -1011,15 +1270,17 @@ function autoCalcUma() {
 
 function calcTotals() {
   return Array.from({length: activePlayers}, (_, pi) => {
-    let raw=0, uma=0, total=0, converted=0;
+    let raw=0, uma=0, total=0, converted=0, gamesPlayed=0;
     gameData.forEach(g => {
       const s = g.scores[pi]; if (!s) return;
       raw  += s.raw===''?0:+s.raw;
       uma  += s.uma===''?0:+s.uma;
       total += s.total||0;
       converted += convertedTotal(s, g.mode||'4');
+      if (s.raw !== '' && s.raw !== null) gamesPlayed++;
     });
-    return {raw, uma, total, converted};
+    const netPt = Math.round(converted - gamesPlayed * 25000);
+    return {raw, uma, total, converted, gamesPlayed, netPt};
   });
 }
 
@@ -1030,15 +1291,113 @@ function fmt(v) {
 
 function updateRanking() {
   const totals = calcTotals();
-  const ranked = totals.map((t,i)=>({name:players[i]||`P${i+1}`,total:t.total,converted:t.converted})).sort((a,b)=>b.converted-a.converted);
+  const ranked = totals.map((t,i)=>({name:players[i]||`P${i+1}`,netPt:t.netPt})).sort((a,b)=>b.netPt-a.netPt);
   const medals  = ['🥇','🥈','🥉','4位','5位','6位','7位','8位'];
   const classes = ['rank-1','rank-2','rank-3','rank-other','rank-other','rank-other','rank-other','rank-other'];
   document.getElementById('ranking-row').innerHTML = ranked.map((r,ri)=>`
     <div class="rank-card ${classes[ri]}">
       <span class="rank-medal">${medals[ri]}</span>
       <div class="rank-name">${r.name}</div>
-      <div class="rank-pt">${r.converted>=0?'+':''}${r.converted.toLocaleString()}<small>pt換算</small></div>
+      <div class="rank-pt">${r.netPt>=0?'+':''}${r.netPt.toLocaleString()}<small>得失点</small></div>
     </div>`).join('');
+}
+
+/* ─────────── 個人成績サマリー ─────────── */
+
+function updatePlayerStats() {
+  const row = document.getElementById('player-stats-row');
+  if (!row) return;
+
+  row.innerHTML = Array.from({length: activePlayers}, (_, pi) => {
+    // 素点が実際に入力された試合のみ対象（空スロット・未参加を除外）
+    const games = gameData.filter(g => {
+      const s = g.scores[pi];
+      return s && s.raw !== '' && s.raw !== null && s.raw !== undefined;
+    });
+    if (!games.length) return '';
+
+    // 得失点 = convertedTotal - 25000 を整数に丸めて計算
+    const converted = games.map(g => Math.round(convertedTotal(g.scores[pi], g.mode||'4') - 25000));
+    const totPt = converted.reduce((a,b)=>a+b, 0);
+    const avgPt = Math.round(totPt / games.length);
+    const maxPt = Math.max(...converted);
+    const minPt = Math.min(...converted);
+
+    // 1位回数：その試合に素点を入力したプレイヤーのみで比較
+    let first1 = 0;
+    games.forEach(g => {
+      const mode = g.mode || '4';
+      const participants = [];
+      for (let j = 0; j < activePlayers; j++) {
+        const sj = g.scores[j];
+        if (sj && sj.raw !== '' && sj.raw !== null) {
+          participants.push(Math.round(convertedTotal(sj, mode) - 25000));
+        }
+      }
+      if (!participants.length) return;
+      const myVal = Math.round(convertedTotal(g.scores[pi], mode) - 25000);
+      if (myVal === Math.max(...participants)) first1++;
+    });
+
+    // 平均順位：参加プレイヤー内での順位を集計（得失点基準）
+    let rankSum = 0;
+    games.forEach(g => {
+      const mode = g.mode || '4';
+      const participants = [];
+      for (let j = 0; j < activePlayers; j++) {
+        const sj = g.scores[j];
+        if (sj && sj.raw !== '' && sj.raw !== null) {
+          participants.push(Math.round(convertedTotal(sj, mode) - 25000));
+        }
+      }
+      const sorted = [...participants].sort((a,b)=>b-a);
+      const myVal = Math.round(convertedTotal(g.scores[pi], mode) - 25000);
+      const rank = sorted.findIndex(v => v === myVal);
+      rankSum += (rank >= 0 ? rank : sorted.length - 1) + 1;
+    });
+    const avgRank = (rankSum / games.length).toFixed(2);
+
+    const color = PLAYER_COLORS[pi];
+    const sign = v => (v>=0?'+':'')+Math.round(v).toLocaleString();
+
+    return `<div class="player-stat-card" style="border-color:${color}44">
+      <div class="psc-name" style="color:${color}">● ${players[pi]||'P'+(pi+1)}</div>
+      <div class="psc-row"><span class="psc-label">出場</span><span class="psc-val">${games.length}局</span></div>
+      <div class="psc-row"><span class="psc-label">月間得失点</span><span class="psc-val ${totPt>=0?'positive':'negative'}">${sign(totPt)}</span></div>
+      <div class="psc-row"><span class="psc-label">平均得失点</span><span class="psc-val ${avgPt>=0?'positive':'negative'}">${sign(avgPt)}</span></div>
+      <div class="psc-row"><span class="psc-label">最高得点</span><span class="psc-val positive">${sign(maxPt)}</span></div>
+      <div class="psc-row"><span class="psc-label">最低得点</span><span class="psc-val ${minPt>=0?'positive':'negative'}">${sign(minPt)}</span></div>
+      <div class="psc-row"><span class="psc-label">1位回数</span><span class="psc-val">${first1}回（${Math.round(first1/games.length*100)}%）</span></div>
+      <div class="psc-row"><span class="psc-label">平均順位</span><span class="psc-val">${avgRank}位</span></div>
+    </div>`;
+  }).join('');
+}
+
+/* ─────────── SNS共有 ─────────── */
+
+function copySNSText() {
+  const year  = document.getElementById('meta-year').value;
+  const month = document.getElementById('meta-month').value;
+  const totals = calcTotals();
+  const ranked = totals.map((t,i)=>({name:players[i]||`P${i+1}`, netPt:t.netPt}))
+                        .sort((a,b)=>b.netPt-a.netPt);
+  const medals = ['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣'];
+  const games3 = gameData.filter(g=>g.mode==='3').length;
+  const games4 = gameData.filter(g=>(g.mode||'4')==='4').length;
+
+  let text = `🀄 ${year}年${month}月 麻雀月間集計\n`;
+  text += `（全${gameData.length}局 ／ 4場:${games4}局 3場:${games3}局）\n\n`;
+  ranked.forEach((r,i) => {
+    const sign = r.netPt >= 0 ? '+' : '';
+    text += `${medals[i]} ${r.name}　${sign}${r.netPt.toLocaleString()}pt\n`;
+  });
+  text += `\n#麻雀 #月間集計`;
+
+  navigator.clipboard.writeText(text).then(() => {
+    alert('SNS用テキストをコピーしました ✓\nそのままSNSに貼り付けできます！');
+  }).catch(() => {
+    prompt('以下をコピーしてください：', text);
+  });
 }
 
 function buildCharts() {
@@ -1128,7 +1487,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (savedToken) {
     restored = await loadFromGitHub();
     if (restored) {
-      updateCounterUI(); renderPlayerGrid(); renderTable(); buildCharts(); updateRanking();
+      updateCounterUI(); renderPlayerGrid(); renderTable(); buildCharts(); updateRanking(); updatePlayerStats();
       renderArchives(); checkMonthChange();
     }
   }
@@ -1143,7 +1502,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         {date:d(0),mode:'4',scores:[{raw:38000,uma:28,total:66000},{raw:20000,uma:-5,total:15000},{raw:25000,uma:5,total:30000},{raw:17000,uma:-15,total:2000},...Array(4).fill(null).map(()=>({raw:'',uma:'',total:0}))]}
       ];
     }
-    updateCounterUI(); renderPlayerGrid(); renderTable(); buildCharts(); updateRanking();
+    updateCounterUI(); renderPlayerGrid(); renderTable(); buildCharts(); updateRanking(); updatePlayerStats();
     renderArchives(); checkMonthChange();
   }
   document.getElementById('meta-year').addEventListener('change', saveAll);
