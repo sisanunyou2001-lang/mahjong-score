@@ -471,17 +471,25 @@ async function loadFromGitHub() {
   if (!token) return false;
   try {
     setSyncStatus('syncing', 'GitHubから読込中…');
+    // 公開リポジトリのraw取得は認証ヘッダー不要（CORSエラー防止）
     const url = `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/${GH_DATA_FILE}?t=${Date.now()}`;
-    const res = await fetch(url, {
-      headers: { 'Authorization': `Bearer ${token}`, 'Cache-Control': 'no-cache' }
-    });
-    if (!res.ok) { setSyncStatus('ok', '✓ GitHub連携済み'); return false; }
+    const res = await fetch(url);
+    if (res.status === 404) {
+      // data.jsonがまだ存在しない（初回）→ エラーではない
+      setSyncStatus('ok', '✓ GitHub連携済み（初回）');
+      return false;
+    }
+    if (!res.ok) {
+      setSyncStatus('err', `✗ 読込失敗 (${res.status})`);
+      return false;
+    }
     const s = await res.json();
     applyState(s);
     setSyncStatus('ok', '✓ GitHubから読込完了');
     return true;
   } catch(e) {
-    setSyncStatus('err', '✗ 読込失敗');
+    // ネットワークエラー等はlocalStorageにフォールバック
+    setSyncStatus('idle', 'オフライン（ローカル保存）');
     return false;
   }
 }
