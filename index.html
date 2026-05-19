@@ -341,9 +341,6 @@
 <div id="save-indicator"><span class="dot"></span><span id="save-text">保存しました</span></div>
 
 <script>
-// ════════════════════════════════════════
-//  STATE
-// ════════════════════════════════════════
 const PLAYER_COLORS = ['#e63946','#457b9d','#2d6a4f','#e76f51','#6a0572','#0077b6','#d4a017','#2f4858'];
 const MIN_P = 2, MAX_P = 8;
 const STORAGE_KEY = 'mahjong_scoresheet_v1';
@@ -351,26 +348,20 @@ const STORAGE_KEY = 'mahjong_scoresheet_v1';
 let activePlayers = 4;
 let players = ['山田','鈴木','田中','佐藤','伊藤','渡辺','高橋','小林'];
 let gameData = [];
-
-// ════════════════════════════════════════
-//  自動保存・ロード
-// ════════════════════════════════════════
+let chartLine, chartBar, chartFirst, chartAvg;
+let chartsReady = false;
 let _saveTimer = null;
 
 function saveAll() {
-  // インジケーター：保存中
   const ind = document.getElementById('save-indicator');
   ind.classList.add('show', 'saving');
   document.getElementById('save-text').textContent = '保存中…';
-
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(() => {
     const state = {
-      activePlayers,
-      players,
-      gameData,
-      year:    document.getElementById('meta-year')?.value,
-      month:   document.getElementById('meta-month')?.value,
+      activePlayers, players, gameData,
+      year:  document.getElementById('meta-year')?.value,
+      month: document.getElementById('meta-month')?.value,
       rules: {
         mochi:  document.getElementById('r-mochi')?.value,
         kaeshi: document.getElementById('r-kaeshi')?.value,
@@ -384,13 +375,9 @@ function saveAll() {
       savedAt: new Date().toISOString(),
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-
-    // インジケーター：完了
     ind.classList.remove('saving');
     document.getElementById('save-text').textContent = '保存しました ✓';
     updateLastSavedLabel(state.savedAt);
-
-    // 3秒後に非表示
     setTimeout(() => ind.classList.remove('show'), 3000);
   }, 600);
 }
@@ -403,12 +390,8 @@ function loadAll() {
     activePlayers = s.activePlayers ?? 4;
     players       = s.players      ?? players;
     gameData      = s.gameData     ?? [];
-
-    // メタ情報
     if (s.year)  document.getElementById('meta-year').value  = s.year;
     if (s.month) document.getElementById('meta-month').value = s.month;
-
-    // ルール
     if (s.rules) {
       const r = s.rules;
       if (r.mochi  != null) document.getElementById('r-mochi').value  = r.mochi;
@@ -420,13 +403,9 @@ function loadAll() {
       if (r.uma4   != null) document.getElementById('r-uma4').value   = r.uma4;
       if (r.type   != null) document.getElementById('r-type').value   = r.type;
     }
-
     if (s.savedAt) updateLastSavedLabel(s.savedAt);
     return true;
-  } catch(e) {
-    console.warn('Load failed', e);
-    return false;
-  }
+  } catch(e) { return false; }
 }
 
 function updateLastSavedLabel(isoStr) {
@@ -444,32 +423,16 @@ function clearAllData() {
   players = ['山田','鈴木','田中','佐藤','伊藤','渡辺','高橋','小林'];
   gameData = [];
   document.getElementById('last-saved-label').textContent = '―';
-  updateCounterUI();
-  renderPlayerGrid();
-  renderTable();
-  updateRanking();
+  updateCounterUI(); renderPlayerGrid(); renderTable(); updateRanking();
   if (chartsReady) updateCharts();
 }
 
-let chartLine, chartBar, chartFirst, chartAvg;
-let chartsReady = false;
-
-// ════════════════════════════════════════
-//  プレイヤー数コントロール
-// ════════════════════════════════════════
 function changePlayerCount(delta) {
   const next = activePlayers + delta;
   if (next < MIN_P || next > MAX_P) return;
   activePlayers = next;
-
-  gameData.forEach(g => {
-    while (g.scores.length < MAX_P) g.scores.push({raw:'', uma:'', total:0});
-  });
-
-  updateCounterUI();
-  renderPlayerGrid();
-  renderTable();
-  updateRanking();
+  gameData.forEach(g => { while (g.scores.length < MAX_P) g.scores.push({raw:'', uma:'', total:0}); });
+  updateCounterUI(); renderPlayerGrid(); renderTable(); updateRanking();
   if (chartsReady) updateCharts();
   saveAll();
 }
@@ -478,7 +441,6 @@ function updateCounterUI() {
   document.getElementById('count-display').textContent = activePlayers;
   document.getElementById('btn-minus').disabled = activePlayers <= MIN_P;
   document.getElementById('btn-plus').disabled  = activePlayers >= MAX_P;
-
   const dots = document.getElementById('player-dots');
   dots.innerHTML = '';
   for (let i = 0; i < MAX_P; i++) {
@@ -491,50 +453,35 @@ function updateCounterUI() {
   }
 }
 
-// ════════════════════════════════════════
-//  プレイヤー名グリッド
-// ════════════════════════════════════════
 function renderPlayerGrid() {
   const grid = document.getElementById('player-grid');
   grid.innerHTML = '';
   for (let i = 0; i < MAX_P; i++) {
     const wrap = document.createElement('div');
     wrap.className = 'player-input-wrap' + (i >= activePlayers ? ' hidden-player' : '');
-    wrap.id = `pw-${i}`;
     wrap.innerHTML = `
       <span class="player-badge">P${i+1}</span>
       <input type="text" value="${players[i]}" placeholder="プレイヤー${i+1}"
              oninput="players[${i}]=this.value||'P${i+1}';onPlayerNameChange()">
-      <span class="player-color-dot" style="background:${PLAYER_COLORS[i]}"></span>
-    `;
+      <span class="player-color-dot" style="background:${PLAYER_COLORS[i]}"></span>`;
     grid.appendChild(wrap);
   }
 }
 
 function onPlayerNameChange() {
-  updateCounterUI();
-  renderTableHead();
-  renderTableFoot();
-  updateRanking();
+  updateCounterUI(); renderTableHead(); renderTableFoot(); updateRanking();
   if (chartsReady) updateCharts();
   saveAll();
 }
 
-// ════════════════════════════════════════
-//  テーブル
-// ════════════════════════════════════════
 function renderTableHead() {
   const thead = document.getElementById('table-head');
   let r1 = '<tr><th rowspan="2" style="min-width:34px;width:34px">No.</th><th rowspan="2" style="min-width:88px">対局日</th>';
-  for (let i = 0; i < activePlayers; i++) {
+  for (let i = 0; i < activePlayers; i++)
     r1 += `<th colspan="3" style="min-width:90px;background:${PLAYER_COLORS[i]}cc">${players[i]||'P'+(i+1)}</th>`;
-  }
   r1 += '</tr><tr>';
-  for (let i = 0; i < activePlayers; i++) {
-    r1 += '<th>素点</th><th>順位点</th><th>合計Pt</th>';
-  }
-  r1 += '</tr>';
-  thead.innerHTML = r1;
+  for (let i = 0; i < activePlayers; i++) r1 += '<th>素点</th><th>順位点</th><th>合計Pt</th>';
+  thead.innerHTML = r1 + '</tr>';
 }
 
 function renderTableBody() {
@@ -547,11 +494,8 @@ function renderTableBody() {
     for (let pi = 0; pi < activePlayers; pi++) {
       const s = game.scores[pi] || {raw:'', uma:'', total:0};
       const cls = s.total > 0 ? 'positive' : s.total < 0 ? 'negative' : '';
-      html += `
-        <td><input type="number" value="${s.raw}" placeholder="0"
-             onchange="setScore(${gi},${pi},'raw',this.value);refresh()"></td>
-        <td><input type="number" value="${s.uma}" placeholder="0"
-             onchange="setScore(${gi},${pi},'uma',this.value);refresh()"></td>
+      html += `<td><input type="number" value="${s.raw}" placeholder="0" onchange="setScore(${gi},${pi},'raw',this.value);refresh()"></td>
+        <td><input type="number" value="${s.uma}" placeholder="0" onchange="setScore(${gi},${pi},'uma',this.value);refresh()"></td>
         <td class="cell-total ${cls}">${s.total!==0||s.raw!==''?fmt(s.total):''}</td>`;
     }
     tr.innerHTML = html;
@@ -563,38 +507,22 @@ function renderTableBody() {
 function renderTableFoot() {
   const tfoot = document.getElementById('table-foot');
   const totals = calcTotals();
-
   let tr1 = '<tr class="total-row"><td>―</td><td>📊 月間合計</td>';
   for (let i = 0; i < activePlayers; i++) {
     const t = totals[i];
     tr1 += `<td>${fmt(t.raw)}</td><td>${fmt(t.uma)}</td><td>${fmt(t.total)}</td>`;
   }
-  tr1 += '</tr>';
-
-  const ranked = Array.from({length:activePlayers},(_,i)=>({i,total:totals[i].total}))
-                      .sort((a,b)=>b.total-a.total);
+  const ranked = Array.from({length:activePlayers},(_,i)=>({i,total:totals[i].total})).sort((a,b)=>b.total-a.total);
   const rankOf = new Array(activePlayers);
   ranked.forEach((r,ri) => { rankOf[r.i] = ri+1; });
-
   const medals = ['🥇','🥈','🥉','4位','5位','6位','7位','8位'];
   let tr2 = '<tr class="rank-row"><td>―</td><td>🏆 月間順位</td>';
-  for (let i = 0; i < activePlayers; i++) {
-    tr2 += `<td colspan="3" style="font-size:1rem">${medals[rankOf[i]-1]}</td>`;
-  }
-  tr2 += '</tr>';
-
-  tfoot.innerHTML = tr1 + tr2;
+  for (let i = 0; i < activePlayers; i++) tr2 += `<td colspan="3" style="font-size:1rem">${medals[rankOf[i]-1]}</td>`;
+  tfoot.innerHTML = tr1 + '</tr>' + tr2 + '</tr>';
 }
 
-function renderTable() {
-  renderTableHead();
-  renderTableBody();
-  renderTableFoot();
-}
+function renderTable() { renderTableHead(); renderTableBody(); renderTableFoot(); }
 
-// ════════════════════════════════════════
-//  スコア操作
-// ════════════════════════════════════════
 function setScore(gi, pi, key, val) {
   while (!gameData[gi].scores[pi]) gameData[gi].scores.push({raw:'',uma:'',total:0});
   gameData[gi].scores[pi][key] = val === '' ? '' : +val;
@@ -603,52 +531,29 @@ function setScore(gi, pi, key, val) {
 }
 
 function addRow() {
-  const today = new Date().toISOString().split('T')[0];
-  gameData.push({ date: today, scores: Array.from({length:MAX_P},()=>({raw:'',uma:'',total:0})) });
-  renderTable();
-  updateRanking();
+  gameData.push({ date: new Date().toISOString().split('T')[0], scores: Array.from({length:MAX_P},()=>({raw:'',uma:'',total:0})) });
+  renderTable(); updateRanking();
   if (chartsReady) updateCharts();
   saveAll();
 }
 
 function removeLastRow() {
   if (!gameData.length) return;
-  gameData.pop();
-  renderTable();
-  updateRanking();
+  gameData.pop(); renderTable(); updateRanking();
   if (chartsReady) updateCharts();
   saveAll();
 }
 
 function refresh() {
-  gameData.forEach(g => {
-    g.scores.forEach(s => {
-      if (!s) return;
-      s.total = (s.raw===''?0:+s.raw) + (s.uma===''?0:+s.uma);
-    });
-  });
-  renderTableBody();
-  refreshFoot();
+  gameData.forEach(g => g.scores.forEach(s => { if(s) s.total=(s.raw===''?0:+s.raw)+(s.uma===''?0:+s.uma); }));
+  renderTableBody(); refreshFoot();
 }
-function refreshFoot() {
-  renderTableFoot();
-  updateRanking();
-  if (chartsReady) updateCharts();
-  saveAll();
-}
+function refreshFoot() { renderTableFoot(); updateRanking(); if (chartsReady) updateCharts(); saveAll(); }
 
-// ════════════════════════════════════════
-//  自動計算
-// ════════════════════════════════════════
 function autoCalcUma() {
   const kaeshi = +document.getElementById('r-kaeshi').value;
   const oka    = +document.getElementById('r-oka').value;
-  const uma    = [
-    +document.getElementById('r-uma1').value,
-    +document.getElementById('r-uma2').value,
-    +document.getElementById('r-uma3').value,
-    +document.getElementById('r-uma4').value,
-  ];
+  const uma    = ['r-uma1','r-uma2','r-uma3','r-uma4'].map(id => +document.getElementById(id).value);
   gameData.forEach(game => {
     const entries = [];
     for (let pi = 0; pi < activePlayers; pi++) {
@@ -657,32 +562,25 @@ function autoCalcUma() {
     }
     entries.sort((a,b) => b.raw - a.raw);
     entries.forEach((e, rank) => {
-      const diff   = Math.round((e.raw - kaeshi) / 100) / 10;
-      const umaVal = ((uma[rank] !== undefined ? uma[rank] : uma[uma.length-1]) / 1000);
-      const okaVal = rank === 0 ? oka / 1000 : 0;
+      const diff     = Math.round((e.raw - kaeshi) / 100) / 10;
+      const umaVal   = (uma[rank] !== undefined ? uma[rank] : uma[uma.length-1]) / 1000;
+      const okaVal   = rank === 0 ? oka / 1000 : 0;
       const umaTotal = Math.round((diff + umaVal + okaVal) * 10) / 10;
       game.scores[e.pi].uma   = umaTotal;
       game.scores[e.pi].total = (+e.raw) + umaTotal;
     });
   });
-  renderTable();
-  updateRanking();
+  renderTable(); updateRanking();
   if (chartsReady) updateCharts();
   saveAll();
 }
 
-// ════════════════════════════════════════
-//  集計
-// ════════════════════════════════════════
 function calcTotals() {
   return Array.from({length: activePlayers}, (_, pi) => {
     let raw=0, uma=0, total=0;
     gameData.forEach(g => {
-      const s = g.scores[pi];
-      if (!s) return;
-      raw   += s.raw===''?0:+s.raw;
-      uma   += s.uma===''?0:+s.uma;
-      total += s.total||0;
+      const s = g.scores[pi]; if (!s) return;
+      raw += s.raw===''?0:+s.raw; uma += s.uma===''?0:+s.uma; total += s.total||0;
     });
     return {raw, uma, total};
   });
@@ -693,13 +591,9 @@ function fmt(v) {
   return (v>=0?'+':'')+Number(v).toLocaleString();
 }
 
-// ════════════════════════════════════════
-//  ランキング
-// ════════════════════════════════════════
 function updateRanking() {
   const totals = calcTotals();
-  const ranked = totals.map((t,i)=>({name:players[i]||`P${i+1}`,total:t.total,color:PLAYER_COLORS[i]}))
-                       .sort((a,b)=>b.total-a.total);
+  const ranked = totals.map((t,i)=>({name:players[i]||`P${i+1}`,total:t.total})).sort((a,b)=>b.total-a.total);
   const medals  = ['🥇','🥈','🥉','4位','5位','6位','7位','8位'];
   const classes = ['rank-1','rank-2','rank-3','rank-other','rank-other','rank-other','rank-other','rank-other'];
   document.getElementById('ranking-row').innerHTML = ranked.map((r,ri)=>`
@@ -710,59 +604,41 @@ function updateRanking() {
     </div>`).join('');
 }
 
-// ════════════════════════════════════════
-//  グラフ
-// ════════════════════════════════════════
 function buildCharts() {
-  const opts = (extra={}) => ({
-    responsive: true,
-    plugins: { legend: { position:'bottom', labels:{ font:{size:11,family:'Noto Sans JP'}, boxWidth:12 } } },
-    scales: { y:{ grid:{ color:'#e8e8e8' } }, x:{ grid:{ color:'#f0f0f0' } } },
-    ...extra
-  });
-
-  chartLine  = new Chart(document.getElementById('chart-line').getContext('2d'),  { type:'line', data:{labels:[],datasets:[]}, options: opts() });
-  chartBar   = new Chart(document.getElementById('chart-bar').getContext('2d'),   { type:'bar',  data:{labels:[],datasets:[]}, options: opts() });
-  chartFirst = new Chart(document.getElementById('chart-first').getContext('2d'), { type:'bar',  data:{labels:[],datasets:[]}, options: opts() });
-  chartAvg   = new Chart(document.getElementById('chart-avg').getContext('2d'),   { type:'bar',  data:{labels:[],datasets:[]}, options: opts({ scales:{ y:{ reverse:true, min:1, max:activePlayers, ticks:{stepSize:1} }, x:{ grid:{ color:'#f0f0f0' } } } }) });
+  const opts = (extra={}) => ({ responsive:true, plugins:{legend:{position:'bottom',labels:{font:{size:11,family:'Noto Sans JP'},boxWidth:12}}}, scales:{y:{grid:{color:'#e8e8e8'}},x:{grid:{color:'#f0f0f0'}}}, ...extra });
+  chartLine  = new Chart(document.getElementById('chart-line').getContext('2d'),  {type:'line',data:{labels:[],datasets:[]},options:opts()});
+  chartBar   = new Chart(document.getElementById('chart-bar').getContext('2d'),   {type:'bar', data:{labels:[],datasets:[]},options:opts()});
+  chartFirst = new Chart(document.getElementById('chart-first').getContext('2d'), {type:'bar', data:{labels:[],datasets:[]},options:opts()});
+  chartAvg   = new Chart(document.getElementById('chart-avg').getContext('2d'),   {type:'bar', data:{labels:[],datasets:[]},options:opts({scales:{y:{reverse:true,min:1,max:activePlayers,ticks:{stepSize:1}},x:{grid:{color:'#f0f0f0'}}}})});
   chartsReady = true;
   updateCharts();
 }
 
 function updateCharts() {
-  const totals  = calcTotals();
-  const labels  = Array.from({length:activePlayers},(_,i)=>players[i]||`P${i+1}`);
-  const colors  = PLAYER_COLORS.slice(0, activePlayers);
+  const totals = calcTotals();
+  const labels = Array.from({length:activePlayers},(_,i)=>players[i]||`P${i+1}`);
+  const colors = PLAYER_COLORS.slice(0, activePlayers);
 
   chartBar.data.labels = labels;
-  chartBar.data.datasets = [{ label:'合計ポイント', data:totals.map(t=>t.total),
-    backgroundColor:colors.map(c=>c+'cc'), borderColor:colors, borderWidth:2, borderRadius:6 }];
+  chartBar.data.datasets = [{label:'合計ポイント',data:totals.map(t=>t.total),backgroundColor:colors.map(c=>c+'cc'),borderColor:colors,borderWidth:2,borderRadius:6}];
   chartBar.update();
 
   const lineLabels = gameData.map((_,i)=>`第${i+1}局`);
-  const lineSets = Array.from({length:activePlayers},(_,pi)=>{
+  chartLine.data.labels = lineLabels.length ? lineLabels : ['（対局なし）'];
+  chartLine.data.datasets = Array.from({length:activePlayers},(_,pi)=>{
     let cum=0;
-    return { label:players[pi]||`P${pi+1}`,
-      data: gameData.map(g=>{ cum+=(g.scores[pi]?.total||0); return cum; }),
-      borderColor:PLAYER_COLORS[pi], backgroundColor:PLAYER_COLORS[pi]+'33',
-      tension:0.3, pointRadius:3, fill:false };
+    return {label:players[pi]||`P${pi+1}`,data:gameData.map(g=>{cum+=(g.scores[pi]?.total||0);return cum;}),borderColor:PLAYER_COLORS[pi],backgroundColor:PLAYER_COLORS[pi]+'33',tension:0.3,pointRadius:3,fill:false};
   });
-  chartLine.data.labels   = lineLabels.length ? lineLabels : ['（対局なし）'];
-  chartLine.data.datasets = lineSets;
   chartLine.update();
 
   const firstCounts = new Array(activePlayers).fill(0);
   gameData.forEach(g => {
     let best=-Infinity, bestPi=0;
-    for(let pi=0;pi<activePlayers;pi++){
-      const v=g.scores[pi]?.total||0;
-      if(v>best){best=v;bestPi=pi;}
-    }
+    for(let pi=0;pi<activePlayers;pi++){const v=g.scores[pi]?.total||0;if(v>best){best=v;bestPi=pi;}}
     firstCounts[bestPi]++;
   });
   chartFirst.data.labels = labels;
-  chartFirst.data.datasets = [{ label:'1位回数', data:firstCounts,
-    backgroundColor:colors.map(c=>c+'cc'), borderColor:colors, borderWidth:2, borderRadius:6 }];
+  chartFirst.data.datasets = [{label:'1位回数',data:firstCounts,backgroundColor:colors.map(c=>c+'cc'),borderColor:colors,borderWidth:2,borderRadius:6}];
   chartFirst.update();
 
   const avgRanks = Array.from({length:activePlayers},(_,pi)=>{
@@ -770,54 +646,27 @@ function updateCharts() {
     let sum=0;
     gameData.forEach(g=>{
       const vals=Array.from({length:activePlayers},(__,j)=>g.scores[j]?.total||0);
-      const sorted=[...vals].sort((a,b)=>b-a);
-      sum += sorted.indexOf(g.scores[pi]?.total||0)+1;
+      sum+=([...vals].sort((a,b)=>b-a).indexOf(g.scores[pi]?.total||0))+1;
     });
     return +(sum/gameData.length).toFixed(2);
   });
   chartAvg.options.scales.y.max = activePlayers;
   chartAvg.data.labels = labels;
-  chartAvg.data.datasets = [{ label:'平均順位', data:avgRanks,
-    backgroundColor:colors.map(c=>c+'cc'), borderColor:colors, borderWidth:2, borderRadius:6 }];
+  chartAvg.data.datasets = [{label:'平均順位',data:avgRanks,backgroundColor:colors.map(c=>c+'cc'),borderColor:colors,borderWidth:2,borderRadius:6}];
   chartAvg.update();
 }
 
-// ════════════════════════════════════════
-//  初期化
-// ════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
-  // まず保存データを試みてロード
   const restored = loadAll();
-
-  // 保存データがなければデモデータを使用
   if (!restored) {
     const d = (n) => { const dt=new Date(); dt.setDate(dt.getDate()-n); return dt.toISOString().split('T')[0]; };
     gameData = [
-      { date:d(6), scores:[
-        {raw:32000,uma:5,total:37000},{raw:28000,uma:-5,total:23000},
-        {raw:18000,uma:-15,total:3000},{raw:22000,uma:3,total:25000},
-        ...Array(4).fill(null).map(()=>({raw:'',uma:'',total:0}))
-      ]},
-      { date:d(3), scores:[
-        {raw:15000,uma:-5,total:10000},{raw:35000,uma:25,total:60000},
-        {raw:29000,uma:5,total:34000},{raw:21000,uma:-15,total:6000},
-        ...Array(4).fill(null).map(()=>({raw:'',uma:'',total:0}))
-      ]},
-      { date:d(0), scores:[
-        {raw:38000,uma:28,total:66000},{raw:20000,uma:-5,total:15000},
-        {raw:25000,uma:5,total:30000},{raw:17000,uma:-15,total:2000},
-        ...Array(4).fill(null).map(()=>({raw:'',uma:'',total:0}))
-      ]}
+      {date:d(6),scores:[{raw:32000,uma:5,total:37000},{raw:28000,uma:-5,total:23000},{raw:18000,uma:-15,total:3000},{raw:22000,uma:3,total:25000},...Array(4).fill(null).map(()=>({raw:'',uma:'',total:0}))]},
+      {date:d(3),scores:[{raw:15000,uma:-5,total:10000},{raw:35000,uma:25,total:60000},{raw:29000,uma:5,total:34000},{raw:21000,uma:-15,total:6000},...Array(4).fill(null).map(()=>({raw:'',uma:'',total:0}))]},
+      {date:d(0),scores:[{raw:38000,uma:28,total:66000},{raw:20000,uma:-5,total:15000},{raw:25000,uma:5,total:30000},{raw:17000,uma:-15,total:2000},...Array(4).fill(null).map(()=>({raw:'',uma:'',total:0}))]}
     ];
   }
-
-  updateCounterUI();
-  renderPlayerGrid();
-  renderTable();
-  buildCharts();
-  updateRanking();
-
-  // メタ入力欄の変更も保存対象に
+  updateCounterUI(); renderPlayerGrid(); renderTable(); buildCharts(); updateRanking();
   document.getElementById('meta-year').addEventListener('change', saveAll);
   document.getElementById('meta-month').addEventListener('change', saveAll);
   ['r-mochi','r-kaeshi','r-oka','r-uma1','r-uma2','r-uma3','r-uma4','r-type'].forEach(id => {
