@@ -185,6 +185,108 @@
   .chart-box { background: white; border-radius: 10px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
   .chart-box h3 { font-size: 0.87rem; font-weight: 700; color: var(--green-dark); margin-bottom: 10px; }
 
+  /* ════════════════════════════════
+     📱 スマートフォン対応
+  ════════════════════════════════ */
+  @media (max-width: 768px) {
+    body { padding: 10px; }
+
+    /* ヘッダー */
+    .header { padding: 14px 16px; gap: 10px; }
+    .header-tiles { font-size: 1.5rem; letter-spacing: 2px; }
+    .header-text h1 { font-size: 1.2rem; }
+    .header-text p  { font-size: 0.75rem; }
+    .header-meta { margin-left: 0; width: 100%; justify-content: flex-start; gap: 8px; }
+    .meta-box { padding: 5px 10px; }
+    .meta-box input, .meta-box select { font-size: 0.95rem; width: 58px; }
+
+    /* プレイヤー数バー */
+    .player-count-bar { padding: 10px 14px; gap: 12px; }
+    .counter-btn { width: 44px; height: 44px; font-size: 1.5rem; }
+    .counter-display { font-size: 1.8rem; min-width: 42px; }
+    .player-dots { gap: 5px; }
+    .player-dot { width: 26px; height: 26px; font-size: 0.65rem; }
+
+    /* カード */
+    .card-body { padding: 12px; }
+    .card-header { font-size: 0.93rem; padding: 10px 14px; }
+
+    /* プレイヤー名入力 */
+    .player-grid { gap: 8px; }
+    .player-input-wrap { width: calc(50% - 4px); }
+
+    /* ルール設定 */
+    .rule-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .rule-item label { font-size: 0.72rem; }
+    .rule-item input, .rule-item select { padding: 8px 8px; font-size: 0.85rem; }
+
+    /* ランキングカード */
+    .ranking-row { gap: 8px; }
+    .rank-card { min-width: calc(50% - 4px); max-width: none; flex: 1 1 calc(50% - 4px); padding: 10px; }
+    .rank-medal { font-size: 1.4rem; }
+    .rank-name  { font-size: 0.85rem; }
+    .rank-pt    { font-size: 1.05rem; }
+
+    /* 集計表 */
+    .table-scroll { -webkit-overflow-scrolling: touch; }
+    table { font-size: 0.78rem; }
+    thead tr:first-child th { padding: 7px 4px; font-size: 0.78rem; }
+    thead tr:last-child th  { padding: 4px 3px; font-size: 0.68rem; }
+    td { padding: 4px 3px; }
+    td input { font-size: 0.78rem; min-width: 44px; padding: 4px 2px; }
+    .btn-sm { padding: 7px 12px; font-size: 0.78rem; min-height: 36px; }
+
+    /* グラフ */
+    .charts-grid { grid-template-columns: 1fr; gap: 12px; }
+    .chart-box { padding: 12px; }
+    .chart-box h3 { font-size: 0.82rem; }
+
+    /* データ管理バー */
+    .data-bar { flex-direction: column; align-items: flex-start; gap: 10px; padding: 12px 14px; }
+    .data-bar-info { margin-left: 0; font-size: 0.74rem; }
+    .gh-token-wrap { width: 100%; flex-wrap: nowrap; gap: 6px; }
+    .gh-token-wrap label { font-size: 0.72rem; white-space: nowrap; }
+    .gh-token-input { flex: 1; min-width: 0; width: auto; font-size: 0.75rem; }
+    #gh-sync-status { font-size: 0.7rem; }
+
+    /* 保存インジケーター */
+    #save-indicator { bottom: 12px; right: 12px; padding: 7px 14px; font-size: 0.78rem; }
+
+    /* ボタン全般 */
+    .btn { min-height: 40px; }
+  }
+
+  @media (max-width: 480px) {
+    body { padding: 8px; }
+
+    /* ヘッダー */
+    .header-tiles { display: none; }
+    .header-text h1 { font-size: 1.1rem; }
+    .header-meta { gap: 6px; }
+    .meta-box { padding: 4px 8px; }
+
+    /* プレイヤー名 - 2列固定 */
+    .player-input-wrap { width: calc(50% - 4px); }
+
+    /* ルール設定 - 2列 */
+    .rule-grid { grid-template-columns: 1fr 1fr; }
+
+    /* ランキング - 2列 */
+    .rank-card { min-width: calc(50% - 4px); }
+
+    /* 対局追加ボタン */
+    .card-header { flex-wrap: wrap; gap: 6px; }
+
+    /* グラフの高さをスマホ向けに調整 */
+    .chart-box canvas { max-height: 220px; }
+
+    /* 自動計算ボタン */
+    .btn-gold { width: 100%; justify-content: center; }
+
+    /* フッター */
+    .footer { font-size: 0.68rem; }
+  }
+
   /* ── ボタン ── */
   .btn {
     padding: 9px 18px; border: none; border-radius: 8px;
@@ -660,8 +762,8 @@ function renderTableBody() {
     for (let pi = 0; pi < activePlayers; pi++) {
       const s = game.scores[pi] || {raw:'', uma:'', total:0};
       const cls = s.total > 0 ? 'positive' : s.total < 0 ? 'negative' : '';
-      html += `<td><input type="number" value="${s.raw}" placeholder="0" onchange="setScore(${gi},${pi},'raw',this.value);refresh()"></td>
-        <td><input type="number" value="${s.uma}" placeholder="0" onchange="setScore(${gi},${pi},'uma',this.value);refresh()"></td>
+      html += `<td><input type="number" inputmode="numeric" value="${s.raw}" placeholder="0" onchange="setScore(${gi},${pi},'raw',this.value);refresh()"></td>
+        <td><input type="number" inputmode="numeric" value="${s.uma}" placeholder="0" onchange="setScore(${gi},${pi},'uma',this.value);refresh()"></td>
         <td class="cell-total ${cls}">${s.total!==0||s.raw!==''?fmt(s.total):''}</td>`;
     }
     tr.innerHTML = html;
