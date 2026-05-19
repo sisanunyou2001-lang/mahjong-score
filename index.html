@@ -379,6 +379,7 @@ const GH_TOKEN_KEY  = 'mahjong_gh_token_v1';
 const GH_OWNER      = 'sisanunyou2001-lang';
 const GH_REPO       = 'mahjong-score';
 const GH_DATA_FILE  = 'data.json';
+const GH_DEFAULT_TOKEN = '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';
 
 let activePlayers = 4;
 let players = ['山田','鈴木','田中','佐藤','伊藤','渡辺','高橋','小林'];
@@ -390,7 +391,7 @@ let _ghSyncing = false;
 
 /* ─────────── GitHub API ─────────── */
 
-function getGHToken() { return localStorage.getItem(GH_TOKEN_KEY) || ''; }
+function getGHToken() { return localStorage.getItem(GH_TOKEN_KEY) || GH_DEFAULT_TOKEN; }
 
 function setSyncStatus(state, msg) {
   const el = document.getElementById('gh-sync-status');
@@ -814,10 +815,12 @@ function updateCharts() {
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
-  // トークンがあれば入力欄に復元
+  // トークンを自動セット（組み込みデフォルト or localStorage）
   const savedToken = getGHToken();
+  const tokenInput = document.getElementById('gh-token-input');
   if (savedToken) {
-    document.getElementById('gh-token-input').value = savedToken;
+    tokenInput.value = savedToken;
+    localStorage.setItem(GH_TOKEN_KEY, savedToken); // localStorageにも保存
     setSyncStatus('syncing', '接続確認中…');
     verifyToken(savedToken);
   }
