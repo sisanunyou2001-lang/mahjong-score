@@ -444,6 +444,102 @@
     .archive-ranking { gap: 6px; }
     .archive-rank-chip { font-size: 0.75rem; padding: 3px 10px; }
   }
+
+  /* ══════════════════════════════════════
+     ✨ ビジュアル強化
+  ══════════════════════════════════════ */
+
+  /* ── ランキング1位パルスアニメーション ── */
+  .rank-1 {
+    background: linear-gradient(135deg, #7b4500, #c8900e 50%, #f0c840);
+    box-shadow: 0 6px 28px rgba(212,160,23,0.6), 0 0 0 0 rgba(255,215,0,0.4);
+    animation: pulse-gold 2.8s ease-in-out infinite;
+  }
+  @keyframes pulse-gold {
+    0%,100% { box-shadow: 0 6px 28px rgba(212,160,23,0.6), 0 0 0 0 rgba(255,215,0,0); }
+    55%     { box-shadow: 0 6px 28px rgba(212,160,23,0.6), 0 0 0 12px rgba(255,215,0,0); }
+  }
+  .rank-medal { font-size: 2rem; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35)); display: block; }
+  .rank-pt { font-size: 1.35rem; font-weight: 900; line-height: 1.35; }
+  .rank-pt small { display: inline-block; font-size: 0.66rem; font-weight: 600; opacity: 0.82; margin-left: 3px; vertical-align: middle; }
+  .rank-card:hover { transform: translateY(-5px); transition: transform .22s; }
+
+  /* ── カードヘッダー左アクセントバー ── */
+  .card-header {
+    border-left: 5px solid var(--gold);
+  }
+
+  /* ── テーブル改善 ── */
+  tbody tr:nth-child(even) { background: #f4faf6; }
+  tbody tr:hover { background: linear-gradient(90deg, #e2f4e8, #f0faf4) !important; }
+  tbody tr.total-row td { border-color: rgba(255,215,0,0.22) !important; }
+  tbody tr.rank-row  td { border-color: rgba(255,215,0,0.15) !important; }
+
+  /* 得失点セルの正負背景チント（:has対応ブラウザ） */
+  td:has(.converted-pt.positive) { background-color: rgba(14,122,60,0.07) !important; }
+  td:has(.converted-pt.negative) { background-color: rgba(198,40,40,0.07) !important; }
+
+  /* 得失点の色をプラス青・マイナス赤に変更（見やすく） */
+  .converted-pt          { font-weight: 700; }
+  .converted-pt.positive { color: #1565c0; }
+  .converted-pt.negative { color: #c62828; }
+
+  /* プレイヤー間の区切りボーダー */
+  th.player-last-col,
+  td.player-last-col { border-right: 3px solid rgba(255,215,0,0.55) !important; }
+
+  /* テーブルスクロールバーのカスタマイズ */
+  .table-scroll::-webkit-scrollbar         { height: 6px; }
+  .table-scroll::-webkit-scrollbar-track   { background: #e8f5e9; border-radius: 3px; }
+  .table-scroll::-webkit-scrollbar-thumb   { background: var(--green-mid); border-radius: 3px; }
+  .table-scroll::-webkit-scrollbar-thumb:hover { background: var(--green-dark); }
+
+  /* ── グラフボックス強化 ── */
+  .chart-box { border: 1px solid #daeee0; transition: box-shadow .22s, transform .22s; }
+  .chart-box:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.13); transform: translateY(-2px); }
+  .chart-box h3 { padding-bottom: 9px; border-bottom: 2px solid #e8f5e9; margin-bottom: 12px; font-size: 0.9rem; }
+
+  /* ── 個人成績カード強化 ── */
+  .player-stat-card {
+    border-width: 1px 1px 1px 1px;
+    border-top-width: 4px;
+    border-radius: 12px;
+    transition: box-shadow .2s, transform .2s;
+    overflow: hidden;
+  }
+  .player-stat-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.13); transform: translateY(-3px); }
+  .psc-name { padding-bottom: 9px; border-bottom: 1.5px solid #f0f0f0; margin-bottom: 6px; font-size: 1rem; }
+  .psc-row  { padding: 3px 0; }
+  .psc-row:last-child { border-bottom: none; }
+  .psc-val.positive { color: #0e7a3c; }
+  .psc-val.negative { color: #c62828; }
+
+  /* ── 正負カラー強化 ── */
+  .positive { color: #0e7a3c; }
+  .negative { color: #c62828; }
+
+  /* ── デイリー行ホバー ── */
+  .daily-game-row { border-radius: 4px; padding: 4px 8px; transition: background .15s; }
+  .daily-game-row:hover { background: #f0f5ff; }
+
+  /* ── アーカイブチップホバー ── */
+  .archive-rank-chip { transition: background .15s, transform .15s; cursor: default; }
+  .archive-rank-chip:hover { background: var(--green-mid); transform: scale(1.04); }
+
+  /* ── ボタン全体の影強化 ── */
+  .btn { box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  .btn:active { transform: translateY(1px) !important; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+
+  /* ── player-count-bar の dot アニメーション ── */
+  .player-dot:not(.inactive) {
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.15);
+    animation: dot-pop .3s ease;
+  }
+  @keyframes dot-pop {
+    0%   { transform: scale(0.7); }
+    60%  { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
 </style>
 </head>
 <body>
@@ -1160,7 +1256,7 @@ function renderTableHead() {
   for (let i = 0; i < activePlayers; i++)
     r1 += `<th colspan="4" style="min-width:120px;background:${PLAYER_COLORS[i]}cc">${players[i]||'P'+(i+1)}</th>`;
   r1 += '</tr><tr>';
-  for (let i = 0; i < activePlayers; i++) r1 += '<th>素点</th><th>順位点</th><th>合計Pt</th><th style="color:#d4a0ff">得失点</th>';
+  for (let i = 0; i < activePlayers; i++) r1 += '<th>素点</th><th>順位点</th><th>合計Pt</th><th class="player-last-col" style="color:#d4a0ff">得失点</th>';
   thead.innerHTML = r1 + '</tr>';
 }
 
@@ -1176,9 +1272,11 @@ function renderTableBody() {
       <td><span class="mode-badge mode-${mode}">${mode}場</span></td>`;
     for (let pi = 0; pi < activePlayers; pi++) {
       const s = game.scores[pi] || {raw:'', uma:'', total:0};
-      const cls = s.total > 0 ? 'positive' : s.total < 0 ? 'negative' : '';
+      const hasData = s.raw !== '' && s.raw !== null;
+      // 合計Pt: 4場=素点, 3場=素点-10000
+      const adjRaw = hasData ? (mode === '3' ? (+s.raw - 10000) : +s.raw) : null;
+      const adjCls = adjRaw > 0 ? 'positive' : adjRaw < 0 ? 'negative' : '';
       const conv = convertedTotal(s, mode);
-      const hasData = s.raw !== '' || s.total !== 0;
       const netConv = hasData ? Math.round(conv - 25000) : 0;
       const netCls = netConv > 0 ? 'positive' : netConv < 0 ? 'negative' : '';
       const convStr = hasData
@@ -1186,8 +1284,8 @@ function renderTableBody() {
         : '';
       html += `<td><input type="number" inputmode="numeric" value="${s.raw}" placeholder="0" onchange="setScore(${gi},${pi},'raw',this.value);refresh();checkRawSum(${gi})"></td>
         <td><input type="number" inputmode="numeric" value="${s.uma}" placeholder="0" onchange="setScore(${gi},${pi},'uma',this.value);refresh()"></td>
-        <td class="cell-total ${cls}">${s.total!==0||s.raw!==''?fmt(s.total):''}</td>
-        <td>${convStr}</td>`;
+        <td class="cell-total ${adjCls}">${adjRaw !== null ? fmt(adjRaw) : ''}</td>
+        <td class="player-last-col">${convStr}</td>`;
     }
     tr.innerHTML = html;
     tbody.appendChild(tr);
@@ -1201,10 +1299,10 @@ function renderTableFoot() {
   let tr1 = '<tr class="total-row"><td>―</td><td>📊 月間合計</td><td>―</td>';
   for (let i = 0; i < activePlayers; i++) {
     const t = totals[i];
-    tr1 += `<td>${fmt(t.raw)}</td><td>${fmt(t.uma)}</td><td>${fmt(t.total)}</td><td style="color:#d4a0ff">${fmt(t.netPt)}</td>`;
+    tr1 += `<td>${fmt(t.raw)}</td><td>${fmt(t.uma)}</td><td>${fmt(t.adjTotal)}</td><td class="player-last-col" style="color:#d4a0ff">${fmt(t.netPt)}</td>`;
   }
-  // 得失点基準で順位を決定
-  const ranked = Array.from({length:activePlayers},(_,i)=>({i,netPt:totals[i].netPt})).sort((a,b)=>b.netPt-a.netPt);
+  // 順位点基準で順位を決定
+  const ranked = Array.from({length:activePlayers},(_,i)=>({i,uma:totals[i].uma})).sort((a,b)=>b.uma-a.uma);
   const rankOf = new Array(activePlayers);
   ranked.forEach((r,ri) => { rankOf[r.i] = ri+1; });
   const medals = ['🥇','🥈','🥉','4位','5位','6位','7位','8位'];
@@ -1270,17 +1368,21 @@ function autoCalcUma() {
 
 function calcTotals() {
   return Array.from({length: activePlayers}, (_, pi) => {
-    let raw=0, uma=0, total=0, converted=0, gamesPlayed=0;
+    let raw=0, uma=0, total=0, converted=0, gamesPlayed=0, adjTotal=0;
     gameData.forEach(g => {
       const s = g.scores[pi]; if (!s) return;
+      const mode = g.mode || '4';
       raw  += s.raw===''?0:+s.raw;
       uma  += s.uma===''?0:+s.uma;
       total += s.total||0;
-      converted += convertedTotal(s, g.mode||'4');
-      if (s.raw !== '' && s.raw !== null) gamesPlayed++;
+      converted += convertedTotal(s, mode);
+      if (s.raw !== '' && s.raw !== null) {
+        gamesPlayed++;
+        adjTotal += mode === '3' ? (+s.raw - 10000) : +s.raw;
+      }
     });
     const netPt = Math.round(converted - gamesPlayed * 25000);
-    return {raw, uma, total, converted, gamesPlayed, netPt};
+    return {raw, uma, total, converted, gamesPlayed, netPt, adjTotal};
   });
 }
 
@@ -1291,14 +1393,14 @@ function fmt(v) {
 
 function updateRanking() {
   const totals = calcTotals();
-  const ranked = totals.map((t,i)=>({name:players[i]||`P${i+1}`,netPt:t.netPt})).sort((a,b)=>b.netPt-a.netPt);
+  const ranked = totals.map((t,i)=>({name:players[i]||`P${i+1}`,uma:t.uma})).sort((a,b)=>b.uma-a.uma);
   const medals  = ['🥇','🥈','🥉','4位','5位','6位','7位','8位'];
   const classes = ['rank-1','rank-2','rank-3','rank-other','rank-other','rank-other','rank-other','rank-other'];
   document.getElementById('ranking-row').innerHTML = ranked.map((r,ri)=>`
     <div class="rank-card ${classes[ri]}">
       <span class="rank-medal">${medals[ri]}</span>
       <div class="rank-name">${r.name}</div>
-      <div class="rank-pt">${r.netPt>=0?'+':''}${r.netPt.toLocaleString()}<small>得失点</small></div>
+      <div class="rank-pt">${r.uma>=0?'+':''}${r.uma.toLocaleString()}<small>順位点</small></div>
     </div>`).join('');
 }
 
@@ -1360,7 +1462,7 @@ function updatePlayerStats() {
     const color = PLAYER_COLORS[pi];
     const sign = v => (v>=0?'+':'')+Math.round(v).toLocaleString();
 
-    return `<div class="player-stat-card" style="border-color:${color}44">
+    return `<div class="player-stat-card" style="border-color:${color}55;border-top:4px solid ${color}">
       <div class="psc-name" style="color:${color}">● ${players[pi]||'P'+(pi+1)}</div>
       <div class="psc-row"><span class="psc-label">出場</span><span class="psc-val">${games.length}局</span></div>
       <div class="psc-row"><span class="psc-label">月間得失点</span><span class="psc-val ${totPt>=0?'positive':'negative'}">${sign(totPt)}</span></div>
@@ -1379,8 +1481,8 @@ function copySNSText() {
   const year  = document.getElementById('meta-year').value;
   const month = document.getElementById('meta-month').value;
   const totals = calcTotals();
-  const ranked = totals.map((t,i)=>({name:players[i]||`P${i+1}`, netPt:t.netPt}))
-                        .sort((a,b)=>b.netPt-a.netPt);
+  const ranked = totals.map((t,i)=>({name:players[i]||`P${i+1}`, uma:t.uma}))
+                        .sort((a,b)=>b.uma-a.uma);
   const medals = ['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣'];
   const games3 = gameData.filter(g=>g.mode==='3').length;
   const games4 = gameData.filter(g=>(g.mode||'4')==='4').length;
@@ -1388,8 +1490,8 @@ function copySNSText() {
   let text = `🀄 ${year}年${month}月 麻雀月間集計\n`;
   text += `（全${gameData.length}局 ／ 4場:${games4}局 3場:${games3}局）\n\n`;
   ranked.forEach((r,i) => {
-    const sign = r.netPt >= 0 ? '+' : '';
-    text += `${medals[i]} ${r.name}　${sign}${r.netPt.toLocaleString()}pt\n`;
+    const sign = r.uma >= 0 ? '+' : '';
+    text += `${medals[i]} ${r.name}　${sign}${r.uma.toLocaleString()}pt\n`;
   });
   text += `\n#麻雀 #月間集計`;
 
