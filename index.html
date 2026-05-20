@@ -1283,7 +1283,10 @@ function renderTableBody() {
         ? `<span class="converted-pt ${netCls}">${fmt(netConv)}</span>${mode === '3' ? '<span class="converted-note">-10k</span>' : ''}`
         : '';
       html += `<td><input type="number" inputmode="numeric" value="${s.raw}" placeholder="0" onchange="setScore(${gi},${pi},'raw',this.value);refresh();checkRawSum(${gi})"></td>
-        <td><input type="number" inputmode="numeric" value="${s.uma}" placeholder="0" onchange="setScore(${gi},${pi},'uma',this.value);refresh()"></td>
+        <td><input type="text" inputmode="decimal" value="${s.uma===''||s.uma===null?'': (+s.uma>=0?'+'+s.uma:s.uma)}" placeholder="0"
+          onfocus="if(this.value[0]==='+')this.value=this.value.slice(1)"
+          onblur="const n=parseFloat(this.value);if(!isNaN(n)){this.value=n>=0?'+'+n:String(n)}else{this.value=''}"
+          onchange="setScore(${gi},${pi},'uma',this.value===''?'':parseFloat(this.value)||0);refresh()"></td>
         <td class="cell-total ${adjCls}">${adjRaw !== null ? fmt(adjRaw) : ''}</td>
         <td class="player-last-col">${convStr}</td>`;
     }
