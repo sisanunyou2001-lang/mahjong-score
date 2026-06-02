@@ -10,622 +10,715 @@
     "yoqko",
     "azu"
   ],
-  "gameData": [
+  "gameData": [],
+  "archives": [
     {
-      "date": "2026-05-19",
-      "mode": "3",
-      "scores": [
+      "year": "2026",
+      "month": "5",
+      "label": "2026年5月",
+      "activePlayers": 8,
+      "players": [
+        "あなぽろん",
+        "シンガニア",
+        "さとうとめこ",
+        "neystorm",
+        "月島 彰",
+        "かばをくん",
+        "yoqko",
+        "azu"
+      ],
+      "gameData": [
         {
-          "raw": 19100,
-          "uma": -30.9,
-          "total": 19069.1
+          "date": "2026-05-19",
+          "mode": "3",
+          "scores": [
+            {
+              "raw": 19100,
+              "uma": -30.9,
+              "total": 19069.1
+            },
+            {
+              "raw": 36500,
+              "uma": 1.5,
+              "total": 36501.5
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": 49400,
+              "uma": 29.4,
+              "total": 49429.4
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            }
+          ],
+          "locked": true
         },
         {
-          "raw": 36500,
-          "uma": 1.5,
-          "total": 36501.5
+          "date": "2026-05-19",
+          "mode": "3",
+          "scores": [
+            {
+              "raw": -700,
+              "uma": -50.7,
+              "total": -750.7
+            },
+            {
+              "raw": 60800,
+              "uma": 40.8,
+              "total": 60840.8
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": 44900,
+              "uma": 9.9,
+              "total": 44909.9
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            }
+          ],
+          "locked": true
         },
         {
-          "raw": "",
-          "uma": "",
-          "total": 0
+          "date": "2026-05-19",
+          "mode": "3",
+          "scores": [
+            {
+              "raw": 32700,
+              "uma": -2.3,
+              "total": 32697.7
+            },
+            {
+              "raw": 18100,
+              "uma": -31.9,
+              "total": 18068.1
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": 54200,
+              "uma": 34.2,
+              "total": 54234.2
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            }
+          ],
+          "locked": true
         },
         {
-          "raw": "",
-          "uma": "",
-          "total": 0
+          "date": "2026-05-24",
+          "mode": "3",
+          "scores": [
+            {
+              "raw": 10400,
+              "uma": -39.6,
+              "total": 10360.4
+            },
+            {
+              "raw": 78700,
+              "uma": 58.7,
+              "total": 78758.7
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": 15900,
+              "uma": -19.1,
+              "total": 15880.9
+            }
+          ],
+          "locked": true
         },
         {
-          "raw": 49400,
-          "uma": 29.4,
-          "total": 49429.4
+          "date": "2026-05-24",
+          "mode": "3",
+          "scores": [
+            {
+              "raw": -7600,
+              "uma": -57.6,
+              "total": -7657.6
+            },
+            {
+              "raw": 68700,
+              "uma": 48.7,
+              "total": 68748.7
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": 43900,
+              "uma": 8.9,
+              "total": 43908.9
+            }
+          ],
+          "locked": true
         },
         {
-          "raw": "",
-          "uma": "",
-          "total": 0
+          "date": "2026-05-24",
+          "mode": "3",
+          "scores": [
+            {
+              "raw": 57500,
+              "uma": 37.5,
+              "total": 57537.5
+            },
+            {
+              "raw": 52800,
+              "uma": 17.8,
+              "total": 52817.8
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": -5300,
+              "uma": -55.3,
+              "total": -5355.3
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            }
+          ],
+          "locked": true
         },
         {
-          "raw": "",
-          "uma": "",
-          "total": 0
+          "date": "2026-05-24",
+          "mode": "3",
+          "scores": [
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": 58300,
+              "uma": 38.3,
+              "total": 58338.3
+            },
+            {
+              "raw": 39600,
+              "uma": 4.6,
+              "total": 39604.6
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": 7100,
+              "uma": -42.9,
+              "total": 7057.1
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            }
+          ],
+          "locked": true
         },
         {
-          "raw": "",
-          "uma": "",
-          "total": 0
+          "date": "2026-05-24",
+          "mode": "3",
+          "scores": [
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": 52100,
+              "uma": 17.1,
+              "total": 52117.1
+            },
+            {
+              "raw": 53600,
+              "uma": 33.6,
+              "total": 53633.6
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": -700,
+              "uma": -50.7,
+              "total": -750.7
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            }
+          ],
+          "locked": true
+        },
+        {
+          "date": "2026-05-24",
+          "mode": "3",
+          "scores": [
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": 39300,
+              "uma": 4.3,
+              "total": 39304.3
+            },
+            {
+              "raw": 21000,
+              "uma": -29,
+              "total": 20971
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": 44700,
+              "uma": 24.7,
+              "total": 44724.7
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            }
+          ],
+          "locked": true
+        },
+        {
+          "date": "2026-05-24",
+          "mode": "3",
+          "scores": [
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": 49300,
+              "uma": 14.3,
+              "total": 49314.3
+            },
+            {
+              "raw": 69900,
+              "uma": 49.9,
+              "total": 69949.9
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": -14200,
+              "uma": -64.2,
+              "total": -14264.2
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            }
+          ],
+          "locked": true
+        },
+        {
+          "date": "2026-05-24",
+          "mode": "4",
+          "scores": [
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": 26400,
+              "uma": 6.4,
+              "total": 26406.4
+            },
+            {
+              "raw": 21400,
+              "uma": -8.6,
+              "total": 21391.4
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": -2200,
+              "uma": -42.2,
+              "total": -2242.2
+            },
+            {
+              "raw": 54400,
+              "uma": 44.4,
+              "total": 54444.4
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            }
+          ],
+          "locked": true
+        },
+        {
+          "date": "2026-05-24",
+          "mode": "4",
+          "scores": [
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": -1400,
+              "uma": -41.4,
+              "total": -1441.4
+            },
+            {
+              "raw": 15800,
+              "uma": -14.2,
+              "total": 15785.8
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": 34600,
+              "uma": 14.6,
+              "total": 34614.6
+            },
+            {
+              "raw": 51000,
+              "uma": 41,
+              "total": 51041
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            }
+          ],
+          "locked": true
+        },
+        {
+          "date": "2026-05-24",
+          "mode": "4",
+          "scores": [
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": 1900,
+              "uma": -38.1,
+              "total": 1861.9
+            },
+            {
+              "raw": 19800,
+              "uma": -10.2,
+              "total": 19789.8
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            },
+            {
+              "raw": 44900,
+              "uma": 34.9,
+              "total": 44934.9
+            },
+            {
+              "raw": 33400,
+              "uma": 13.4,
+              "total": 33413.4
+            },
+            {
+              "raw": "",
+              "uma": "",
+              "total": 0
+            }
+          ],
+          "locked": true
         }
       ],
-      "locked": true
-    },
-    {
-      "date": "2026-05-19",
-      "mode": "3",
-      "scores": [
+      "totals": [
         {
-          "raw": -700,
-          "uma": -50.7,
-          "total": -750.7
+          "raw": 111400,
+          "uma": -143.6,
+          "total": 111256.4,
+          "converted": 51256.4,
+          "gamesPlayed": 6,
+          "netPt": -98744,
+          "adjTotal": 51400
         },
         {
-          "raw": 60800,
-          "uma": 40.8,
-          "total": 60840.8
+          "raw": 541500,
+          "uma": 136.5,
+          "total": 541636.4999999999,
+          "converted": 441636.49999999994,
+          "gamesPlayed": 13,
+          "netPt": 116636,
+          "adjTotal": 441500
         },
         {
-          "raw": "",
-          "uma": "",
-          "total": 0
+          "raw": 241100,
+          "uma": 26.099999999999998,
+          "total": 241126.09999999995,
+          "converted": 201126.09999999995,
+          "gamesPlayed": 7,
+          "netPt": 26126,
+          "adjTotal": 201100
         },
         {
-          "raw": "",
-          "uma": "",
-          "total": 0
+          "raw": 0,
+          "uma": 0,
+          "total": 0,
+          "converted": 0,
+          "gamesPlayed": 0,
+          "netPt": 0,
+          "adjTotal": 0
         },
         {
-          "raw": 44900,
-          "uma": 9.9,
-          "total": 44909.9
+          "raw": 148500,
+          "uma": 73.5,
+          "total": 148573.5,
+          "converted": 118573.5,
+          "gamesPlayed": 3,
+          "netPt": 43574,
+          "adjTotal": 118500
         },
         {
-          "raw": "",
-          "uma": "",
-          "total": 0
+          "raw": 108900,
+          "uma": -181.09999999999997,
+          "total": 108718.9,
+          "converted": 58718.899999999994,
+          "gamesPlayed": 8,
+          "netPt": -141281,
+          "adjTotal": 58900
         },
         {
-          "raw": "",
-          "uma": "",
-          "total": 0
+          "raw": 138800,
+          "uma": 98.80000000000001,
+          "total": 138898.8,
+          "converted": 138898.8,
+          "gamesPlayed": 3,
+          "netPt": 63899,
+          "adjTotal": 138800
         },
         {
-          "raw": "",
-          "uma": "",
-          "total": 0
+          "raw": 59800,
+          "uma": -10.200000000000001,
+          "total": 59789.8,
+          "converted": 39789.8,
+          "gamesPlayed": 2,
+          "netPt": -10210,
+          "adjTotal": 39800
         }
       ],
-      "locked": true
-    },
-    {
-      "date": "2026-05-19",
-      "mode": "3",
-      "scores": [
-        {
-          "raw": 32700,
-          "uma": -2.3,
-          "total": 32697.7
-        },
-        {
-          "raw": 18100,
-          "uma": -31.9,
-          "total": 18068.1
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": 54200,
-          "uma": 34.2,
-          "total": 54234.2
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        }
-      ],
-      "locked": true
-    },
-    {
-      "date": "2026-05-24",
-      "mode": "3",
-      "scores": [
-        {
-          "raw": 10400,
-          "uma": -39.6,
-          "total": 10360.4
-        },
-        {
-          "raw": 78700,
-          "uma": 58.7,
-          "total": 78758.7
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": 15900,
-          "uma": -19.1,
-          "total": 15880.9
-        }
-      ],
-      "locked": true
-    },
-    {
-      "date": "2026-05-24",
-      "mode": "3",
-      "scores": [
-        {
-          "raw": -7600,
-          "uma": -57.6,
-          "total": -7657.6
-        },
-        {
-          "raw": 68700,
-          "uma": 48.7,
-          "total": 68748.7
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": 43900,
-          "uma": 8.9,
-          "total": 43908.9
-        }
-      ],
-      "locked": true
-    },
-    {
-      "date": "2026-05-24",
-      "mode": "3",
-      "scores": [
-        {
-          "raw": 57500,
-          "uma": 37.5,
-          "total": 57537.5
-        },
-        {
-          "raw": 52800,
-          "uma": 17.8,
-          "total": 52817.8
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": -5300,
-          "uma": -55.3,
-          "total": -5355.3
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        }
-      ],
-      "locked": true
-    },
-    {
-      "date": "2026-05-24",
-      "mode": "3",
-      "scores": [
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": 58300,
-          "uma": 38.3,
-          "total": 58338.3
-        },
-        {
-          "raw": 39600,
-          "uma": 4.6,
-          "total": 39604.6
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": 7100,
-          "uma": -42.9,
-          "total": 7057.1
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        }
-      ],
-      "locked": true
-    },
-    {
-      "date": "2026-05-24",
-      "mode": "3",
-      "scores": [
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": 52100,
-          "uma": 17.1,
-          "total": 52117.1
-        },
-        {
-          "raw": 53600,
-          "uma": 33.6,
-          "total": 53633.6
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": -700,
-          "uma": -50.7,
-          "total": -750.7
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        }
-      ],
-      "locked": true
-    },
-    {
-      "date": "2026-05-24",
-      "mode": "3",
-      "scores": [
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": 39300,
-          "uma": 4.3,
-          "total": 39304.3
-        },
-        {
-          "raw": 21000,
-          "uma": -29,
-          "total": 20971
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": 44700,
-          "uma": 24.7,
-          "total": 44724.7
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        }
-      ],
-      "locked": true
-    },
-    {
-      "date": "2026-05-24",
-      "mode": "3",
-      "scores": [
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": 49300,
-          "uma": 14.3,
-          "total": 49314.3
-        },
-        {
-          "raw": 69900,
-          "uma": 49.9,
-          "total": 69949.9
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": -14200,
-          "uma": -64.2,
-          "total": -14264.2
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        }
-      ],
-      "locked": true
-    },
-    {
-      "date": "2026-05-24",
-      "mode": "4",
-      "scores": [
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": 26400,
-          "uma": 6.4,
-          "total": 26406.4
-        },
-        {
-          "raw": 21400,
-          "uma": -8.6,
-          "total": 21391.4
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": -2200,
-          "uma": -42.2,
-          "total": -2242.2
-        },
-        {
-          "raw": 54400,
-          "uma": 44.4,
-          "total": 54444.4
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        }
-      ],
-      "locked": true
-    },
-    {
-      "date": "2026-05-24",
-      "mode": "4",
-      "scores": [
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": -1400,
-          "uma": -41.4,
-          "total": -1441.4
-        },
-        {
-          "raw": 15800,
-          "uma": -14.2,
-          "total": 15785.8
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": 34600,
-          "uma": 14.6,
-          "total": 34614.6
-        },
-        {
-          "raw": 51000,
-          "uma": 41,
-          "total": 51041
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        }
-      ],
-      "locked": true
-    },
-    {
-      "date": "2026-05-24",
-      "mode": "4",
-      "scores": [
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": 1900,
-          "uma": -38.1,
-          "total": 1861.9
-        },
-        {
-          "raw": 19800,
-          "uma": -10.2,
-          "total": 19789.8
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        },
-        {
-          "raw": 44900,
-          "uma": 34.9,
-          "total": 44934.9
-        },
-        {
-          "raw": 33400,
-          "uma": 13.4,
-          "total": 33413.4
-        },
-        {
-          "raw": "",
-          "uma": "",
-          "total": 0
-        }
-      ],
-      "locked": true
+      "archivedAt": "2026-06-02T15:50:09.464Z"
     }
   ],
-  "archives": [],
   "year": "2026",
-  "month": "5",
+  "month": "6",
   "rules": {
     "mochi": "25000",
     "kaeshi": "25000",
@@ -636,5 +729,5 @@
     "uma4": "-15000",
     "type": "半荘"
   },
-  "savedAt": "2026-05-25T11:33:15.721Z"
+  "savedAt": "2026-06-02T15:50:10.882Z"
 }
