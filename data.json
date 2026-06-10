@@ -10,7 +10,55 @@
     "yoqko",
     "azu"
   ],
-  "gameData": [],
+  "gameData": [
+    {
+      "date": "2026-06-10",
+      "mode": "3",
+      "locked": false,
+      "scores": [
+        {
+          "raw": "",
+          "uma": "",
+          "total": 0
+        },
+        {
+          "raw": "",
+          "uma": "",
+          "total": 0
+        },
+        {
+          "raw": "",
+          "uma": "",
+          "total": 0
+        },
+        {
+          "raw": "",
+          "uma": "",
+          "total": 0
+        },
+        {
+          "raw": "",
+          "uma": "",
+          "total": 0
+        },
+        {
+          "raw": "",
+          "uma": "",
+          "total": 0
+        },
+        {
+          "raw": "",
+          "uma": "",
+          "total": 0
+        },
+        {
+          "raw": "",
+          "uma": "",
+          "total": 0
+        }
+      ]
+    }
+  ],
   "archives": [
     {
       "year": "2026",
@@ -729,5 +777,5 @@
     "uma4": "-15000",
     "type": "半荘"
   },
-  "savedAt": "2026-06-10T17:20:39.645Z"
+  "savedAt": "2026-06-10T17:50:07.068Z"
 }
